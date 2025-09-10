@@ -2,16 +2,40 @@
 
 namespace Kikwik\MailManagerBundle;
 
+use App\Entity\Mail\Template;
 use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappingsPass;
+use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 class KikwikMailManagerBundle extends AbstractBundle
 {
+    public function configure(DefinitionConfigurator $definition): void
+    {
+        $definition->rootNode()
+            ->children()
+                ->stringNode('template_class')
+                    ->info('The class name of your Template entity.')
+                        ->example('App\Entity\Mail\Template')
+                        ->isRequired()
+                        ->cannotBeEmpty()
+                        ->validate()
+                        ->ifTrue(fn ($v) => !is_a($v, Template::class, true))
+                        ->thenInvalid('The template_class %s must extend Kikwik\MailManagerBundle\Model\Template.')
+                    ->end()
+                ->end()
+            ->end()
+        ;
+    }
+
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         $container->import('../config/services.php');
+
+        $builder->getDefinition('kikwik_mail_manager.service.mail_manager')
+            ->setArgument(0, $config['template_class'])
+        ;
     }
 
     public function build(ContainerBuilder $container): void

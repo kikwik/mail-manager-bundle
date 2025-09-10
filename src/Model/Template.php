@@ -4,54 +4,61 @@ namespace Kikwik\MailManagerBundle\Model;
 
 abstract class Template
 {
-    protected ?int $id = null;
+    protected ?string $name = null;
 
-    protected ?string $code = null;
+    protected bool $isEnabled = true;
 
-    protected ?string $event = null;
+    protected ?string $senderName = null;
 
-    protected ?Sender $sender = null;
+    protected ?string $senderEmail =  null;
 
     protected ?string $subject = null;
 
     protected ?string $body = null;
 
 
-    public function getId(): ?int
+
+    public function getName(): ?string
     {
-        return $this->id;
+        return $this->name;
     }
 
-    public function getCode(): ?string
+    public function setName(?string $name): static
     {
-        return $this->code;
-    }
-
-    public function setCode(?string $code): static
-    {
-        $this->code = $code;
+        $this->name = $name;
         return $this;
     }
 
-    public function getEvent(): ?string
+    public function isEnabled(): bool
     {
-        return $this->event;
+        return $this->isEnabled;
     }
 
-    public function setEvent(?string $event): static
+    public function setIsEnabled(bool $isEnabled): static
     {
-        $this->event = $event;
+        $this->isEnabled = $isEnabled;
         return $this;
     }
 
-    public function getSender(): ?Sender
+    public function getSenderName(): ?string
     {
-        return $this->sender;
+        return $this->senderName;
     }
 
-    public function setSender(?Sender $sender): static
+    public function setSenderName(?string $senderName): static
     {
-        $this->sender = $sender;
+        $this->senderName = $senderName;
+        return $this;
+    }
+
+    public function getSenderEmail(): ?string
+    {
+        return $this->senderEmail;
+    }
+
+    public function setSenderEmail(?string $senderEmail): static
+    {
+        $this->senderEmail = $senderEmail;
         return $this;
     }
 
@@ -76,6 +83,5 @@ abstract class Template
         $this->body = $body;
         return $this;
     }
-
 
 }
