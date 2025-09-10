@@ -4,6 +4,10 @@ namespace Kikwik\MailManagerBundle\Model;
 
 abstract class Template
 {
+    /**************************************/
+    /* PROPERTIES                         */
+    /**************************************/
+
     protected ?string $name = null;
 
     protected bool $isEnabled = true;
@@ -16,7 +20,18 @@ abstract class Template
 
     protected ?string $body = null;
 
+    /**************************************/
+    /* CUSTOM METHODS                     */
+    /**************************************/
 
+    public function __toString(): string
+    {
+        return (string)$this->getName();
+    }
+
+    /**************************************/
+    /* GETTERS & SETTERS                  */
+    /**************************************/
 
     public function getName(): ?string
     {

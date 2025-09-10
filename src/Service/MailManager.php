@@ -2,6 +2,7 @@
 
 namespace Kikwik\MailManagerBundle\Service;
 
+use App\Entity\Mail\Log;
 use Doctrine\ORM\EntityManagerInterface;
 use Kikwik\MailManagerBundle\Model\Template;
 use Symfony\Component\Mailer\MailerInterface;
@@ -13,7 +14,8 @@ class MailManager
 {
 
     public function __construct(
-        private string $templateClass,
+        private ?string $templateClass,
+        private ?string $logClass,
         private readonly EntityManagerInterface $entityManager,
         public readonly Environment $twig,
         private readonly MailerInterface $mailer,
@@ -24,6 +26,8 @@ class MailManager
 
     public function send(Address $recipient, string $templateName, array $context = [])
     {
+        if(!$this->templateClass) throw new \Exception('Template class not set, please define kikwik_mail_manager.template_class in config/packages/kikwik_mail_manager.yaml');
+
         $template = $this->entityManager->getRepository($this->templateClass)->findOneBy(['name' => $templateName]);
         if($template)
         {
@@ -53,12 +57,28 @@ class MailManager
                     ->html($body);
 
                 // TODO: dispatch some event
-                // TODO: save sended email
 
                 // send the email
                 $this->mailer->send($email);
-            }
 
+                if($this->logClass)
+                {
+                    // save sended email
+                    /** @var Log $log */
+                    $log = new $this->logClass();
+                    $log->setSenderName($sender->getName());
+                    $log->setSenderEmail($sender->getAddress());
+                    $log->setRecipientName($recipient->getName());
+                    $log->setRecipientEmail($recipient->getAddress());
+                    $log->setTemplateName($templateName);
+                    $log->setSubject($subject);
+                    $log->setSerializedEmail(serialize($email));
+                    $log->setSendedAt(new \DateTimeImmutable());
+                    $this->entityManager->persist($log);
+                    $this->entityManager->flush();
+                }
+
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ return static function (ContainerConfigurator $container): void {
         ->set('kikwik_mail_manager.service.mail_manager', MailManager::class)
             ->args([
                 abstract_arg('Template class'),
+                abstract_arg('Log class'),
                 service('doctrine.orm.entity_manager'),
                 service('twig'),
                 service('mailer'),

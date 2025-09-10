@@ -2,8 +2,9 @@
 
 namespace Kikwik\MailManagerBundle;
 
-use App\Entity\Mail\Template;
 use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappingsPass;
+use Kikwik\MailManagerBundle\Model\Log;
+use Kikwik\MailManagerBundle\Model\Template;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -17,12 +18,23 @@ class KikwikMailManagerBundle extends AbstractBundle
             ->children()
                 ->stringNode('template_class')
                     ->info('The class name of your Template entity.')
-                        ->example('App\Entity\Mail\Template')
-                        ->isRequired()
-                        ->cannotBeEmpty()
-                        ->validate()
+                    ->example('App\Entity\Mail\Template')
+//                    ->isRequired()
+//                    ->cannotBeEmpty()
+                    ->validate()
                         ->ifTrue(fn ($v) => !is_a($v, Template::class, true))
                         ->thenInvalid('The template_class %s must extend Kikwik\MailManagerBundle\Model\Template.')
+                    ->end()
+                ->end()
+                ->stringNode('log_class')
+                    ->info('The class name of your Log of sended email entity, false to disable logging.')
+                    ->example('App\Entity\Mail\Log')
+                    ->defaultFalse()
+//                    ->isRequired()
+//                    ->cannotBeEmpty()
+                    ->validate()
+                        ->ifTrue(fn ($v) => !is_a($v, Log::class, true))
+                        ->thenInvalid('The template_class %s must extend Kikwik\MailManagerBundle\Model\Log.')
                     ->end()
                 ->end()
             ->end()
@@ -35,6 +47,7 @@ class KikwikMailManagerBundle extends AbstractBundle
 
         $builder->getDefinition('kikwik_mail_manager.service.mail_manager')
             ->setArgument(0, $config['template_class'])
+            ->setArgument(1, $config['log_class'])
         ;
     }
 
