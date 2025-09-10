@@ -10,7 +10,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Twig\Environment;
 
-class MailManager
+final class MailManager
 {
 
     public function __construct(
@@ -24,9 +24,12 @@ class MailManager
     }
 
 
-    public function send(Address $recipient, string $templateName, array $context = [])
+    public function send(Address $recipient, string $templateName, array $context = []): void
     {
-        if(!$this->templateClass) throw new \Exception('Template class not set, please define kikwik_mail_manager.template_class in config/packages/kikwik_mail_manager.yaml');
+        if(!$this->templateClass){
+            // template_class is required
+            throw new \Exception('Template class not set, please define kikwik_mail_manager.template_class in config/packages/kikwik_mail_manager.yaml');
+        }
 
         $template = $this->entityManager->getRepository($this->templateClass)->findOneBy(['name' => $templateName]);
         if($template)

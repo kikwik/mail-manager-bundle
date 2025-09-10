@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
-class KikwikMailManagerBundle extends AbstractBundle
+final class KikwikMailManagerBundle extends AbstractBundle
 {
     public function configure(DefinitionConfigurator $definition): void
     {
@@ -19,8 +19,7 @@ class KikwikMailManagerBundle extends AbstractBundle
                 ->stringNode('template_class')
                     ->info('The class name of your Template entity.')
                     ->example('App\Entity\Mail\Template')
-//                    ->isRequired()
-//                    ->cannotBeEmpty()
+                    ->defaultNull()
                     ->validate()
                         ->ifTrue(fn ($v) => !is_a($v, Template::class, true))
                         ->thenInvalid('The template_class %s must extend Kikwik\MailManagerBundle\Model\Template.')
@@ -30,8 +29,6 @@ class KikwikMailManagerBundle extends AbstractBundle
                     ->info('The class name of your Log of sended email entity, false to disable logging.')
                     ->example('App\Entity\Mail\Log')
                     ->defaultFalse()
-//                    ->isRequired()
-//                    ->cannotBeEmpty()
                     ->validate()
                         ->ifTrue(fn ($v) => !is_a($v, Log::class, true))
                         ->thenInvalid('The template_class %s must extend Kikwik\MailManagerBundle\Model\Log.')
@@ -45,6 +42,7 @@ class KikwikMailManagerBundle extends AbstractBundle
     {
         $container->import('../config/services.php');
 
+        // set parameters value to the MailManager service
         $builder->getDefinition('kikwik_mail_manager.service.mail_manager')
             ->setArgument(0, $config['template_class'])
             ->setArgument(1, $config['log_class'])
@@ -53,6 +51,7 @@ class KikwikMailManagerBundle extends AbstractBundle
 
     public function build(ContainerBuilder $container): void
     {
+        // Load doctrine mapping for models
         $container->addCompilerPass(DoctrineOrmMappingsPass::createXmlMappingDriver(
             array(__DIR__ . '/../config/doctrine/mapping' => 'Kikwik\MailManagerBundle\Model'),
         ));
