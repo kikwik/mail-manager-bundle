@@ -4,6 +4,7 @@ namespace Kikwik\MailManagerBundle\Service;
 
 use App\Entity\Mail\Log;
 use Doctrine\ORM\EntityManagerInterface;
+use Kikwik\MailManagerBundle\Model\LogInterface;
 use Kikwik\MailManagerBundle\Model\Template;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -23,12 +24,20 @@ final class MailManager
     {
     }
 
+    public function composeAndSend(Address $recipient, string $templateName, array $context = []): void
+    {
+        $this->send($this->compose($recipient, $templateName, $context, false));
+    }
 
-    public function send(Address $recipient, string $templateName, array $context = []): void
+    public function compose(Address $recipient, string $templateName, array $context = [], bool $persistLog = false): ?LogInterface
     {
         if(!$this->templateClass){
             // template_class is required
             throw new \Exception('Template class not set, please define kikwik_mail_manager.template_class in config/packages/kikwik_mail_manager.yaml');
+        }
+        if(!$this->logClass){
+            // log_class is required
+            throw new \Exception('Log class not set, please define kikwik_mail_manager.log_class in config/packages/kikwik_mail_manager.yaml');
         }
 
         $template = $this->entityManager->getRepository($this->templateClass)->findOneBy(['name' => $templateName]);
@@ -61,27 +70,37 @@ final class MailManager
 
                 // TODO: dispatch some event
 
-                // send the email
-                $this->mailer->send($email);
-
-                if($this->logClass)
+                // save sended email
+                /** @var Log $log */
+                $log = new $this->logClass();
+                $log->setSenderName($sender->getName());
+                $log->setSenderEmail($sender->getAddress());
+                $log->setRecipientName($recipient->getName());
+                $log->setRecipientEmail($recipient->getAddress());
+                $log->setTemplateName($templateName);
+                $log->setSubject($subject);
+                $log->setSerializedEmail(serialize($email));
+                if($persistLog)
                 {
-                    // save sended email
-                    /** @var Log $log */
-                    $log = new $this->logClass();
-                    $log->setSenderName($sender->getName());
-                    $log->setSenderEmail($sender->getAddress());
-                    $log->setRecipientName($recipient->getName());
-                    $log->setRecipientEmail($recipient->getAddress());
-                    $log->setTemplateName($templateName);
-                    $log->setSubject($subject);
-                    $log->setSerializedEmail(serialize($email));
-                    $log->setSendedAt(new \DateTimeImmutable());
                     $this->entityManager->persist($log);
                     $this->entityManager->flush();
                 }
 
+                return $log;
             }
         }
+        return null;
+    }
+
+    public function send(LogInterface $log): void
+    {
+        $email = unserialize($log->getSerializedEmail());
+
+        // TODO: dispatch some event
+        $this->mailer->send($email);
+
+        $log->setSendedAt(new \DateTimeImmutable());
+        $this->entityManager->persist($log);
+        $this->entityManager->flush();
     }
 }

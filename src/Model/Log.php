@@ -2,7 +2,7 @@
 
 namespace Kikwik\MailManagerBundle\Model;
 
-abstract class Log
+abstract class Log implements LogInterface
 {
     /**************************************/
     /* PROPERTIES                         */
