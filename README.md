@@ -31,9 +31,11 @@ use Gedmo\Blameable\Traits\BlameableEntity;
 use Gedmo\IpTraceable\Traits\IpTraceableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Kikwik\MailManagerBundle\Model\Template as BaseTemplate;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: TemplateRepository::class)]
 #[ORM\Table('mail_template')]
+#[UniqueEntity(fields: ['name'])]
 class Template extends BaseTemplate
 {
     use TimestampableEntity;

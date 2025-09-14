@@ -26,7 +26,7 @@ final class MailManager
 
     public function composeAndSend(Address $recipient, string $templateName, array $context = []): void
     {
-        $this->send($this->compose($recipient, $templateName, $context, false));
+        $this->send($this->compose($recipient, $templateName, $context));
     }
 
     public function compose(Address $recipient, string $templateName, array $context = [], bool $persistLog = false): ?LogInterface
@@ -70,8 +70,8 @@ final class MailManager
 
                 // TODO: dispatch some event
 
-                // save sended email
-                /** @var Log $log */
+                // create Log for email
+                /** @var LogInterface $log */
                 $log = new $this->logClass();
                 $log->setSenderName($sender->getName());
                 $log->setSenderEmail($sender->getAddress());
@@ -94,11 +94,15 @@ final class MailManager
 
     public function send(LogInterface $log): void
     {
+        // retrieve the mail object
         $email = unserialize($log->getSerializedEmail());
 
         // TODO: dispatch some event
+
+        // send the email
         $this->mailer->send($email);
 
+        // save the date in the lof
         $log->setSendedAt(new \DateTimeImmutable());
         $this->entityManager->persist($log);
         $this->entityManager->flush();
