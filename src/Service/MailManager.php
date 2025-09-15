@@ -92,19 +92,22 @@ final class MailManager
         return null;
     }
 
-    public function send(LogInterface $log): void
+    public function send(?LogInterface $log): void
     {
-        // retrieve the mail object
-        $email = unserialize($log->getSerializedEmail());
+        if($log)
+        {
+            // retrieve the mail object
+            $email = unserialize($log->getSerializedEmail());
 
-        // TODO: dispatch some event
+            // TODO: dispatch some event
 
-        // send the email
-        $this->mailer->send($email);
+            // send the email
+            $this->mailer->send($email);
 
-        // save the date in the lof
-        $log->setSendedAt(new \DateTimeImmutable());
-        $this->entityManager->persist($log);
-        $this->entityManager->flush();
+            // save the date in the lof
+            $log->setSendedAt(new \DateTimeImmutable());
+            $this->entityManager->persist($log);
+            $this->entityManager->flush();
+        }
     }
 }
