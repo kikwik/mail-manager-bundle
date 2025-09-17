@@ -25,18 +25,18 @@ $ composer require kikwik/mail-manager-bundle
 
 namespace App\Entity\Mail;
 
-use App\Repository\Mail\TemplateRepository;
+use App\Repository\Mail\MailTemplateRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Blameable\Traits\BlameableEntity;
 use Gedmo\IpTraceable\Traits\IpTraceableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
-use Kikwik\MailManagerBundle\Model\Template as BaseTemplate;
+use Kikwik\MailManagerBundle\Model\Template;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
-#[ORM\Entity(repositoryClass: TemplateRepository::class)]
-#[ORM\Table('mail_template')]
+#[ORM\Entity(repositoryClass: MailTemplateRepository::class)]
+#[ORM\Table('mail__template')]
 #[UniqueEntity(fields: ['name'])]
-class Template extends BaseTemplate
+class MailTemplate extends Template
 {
     use TimestampableEntity;
     use BlameableEntity;
@@ -68,16 +68,16 @@ class Template extends BaseTemplate
 
 namespace App\Entity\Mail;
 
-use App\Repository\Mail\LogRepository;
+use App\Repository\Mail\MailLogRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Blameable\Traits\BlameableEntity;
 use Gedmo\IpTraceable\Traits\IpTraceableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
-use Kikwik\MailManagerBundle\Model\Log as BaseLog;
+use Kikwik\MailManagerBundle\Model\Log;
 
-#[ORM\Entity(repositoryClass: LogRepository::class)]
-#[ORM\Table('mail_log')]
-class Log extends BaseLog
+#[ORM\Entity(repositoryClass: MailLogRepository::class)]
+#[ORM\Table('mail__log')]
+class MailLog extends Log
 {
     use TimestampableEntity;
     use BlameableEntity;
@@ -107,8 +107,8 @@ class Log extends BaseLog
 
 ```yaml
 kikwik_mail_manager:
-    template_class: App\Entity\Mail\Template
-    log_class:      App\Entity\Mail\Log
+    template_class: App\Entity\Mail\MailTemplate
+    log_class:      App\Entity\Mail\MailLog
 ```
 
 4. Update the database to create the tables for entities provided by the bundle:
@@ -136,14 +136,14 @@ final class MyController extends AbstractController
         // This will create a new mail (not saved in database)
         $mail = $mailManager->compose(
             new Address('test@example.com','My customer'),
-            Template::MY_TEMPLATE,
+            'my_template_name',
             ['my_param' => 'my_value']
         ); 
     
         // This will create a new mail and persist and flush into the database (sendedAt will be null)
         $mail = $mailManager->compose(
             new Address('test@example.com','My customer'),
-            Template::MY_TEMPLATE,
+            'my_template_name',
             ['my_param' => 'my_value'],
             true
         ); 
@@ -154,7 +154,7 @@ final class MyController extends AbstractController
         // This will create, persist and send email
         $mailManager->composeAndSend(
             new Address('test@example.com','My customer'),
-            Template::MY_TEMPLATE,
+            'my_template_name',
             ['my_param' => 'my_value']
         ); 
     }

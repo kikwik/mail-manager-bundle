@@ -2,7 +2,6 @@
 
 namespace Kikwik\MailManagerBundle\Service;
 
-use App\Entity\Mail\Log;
 use Doctrine\ORM\EntityManagerInterface;
 use Kikwik\MailManagerBundle\Model\LogInterface;
 use Kikwik\MailManagerBundle\Model\Template;

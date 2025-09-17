@@ -33,6 +33,11 @@ abstract class Log implements LogInterface
         return (string)$this->getSubject();
     }
 
+    public function getUnserializedEmail()
+    {
+        return unserialize($this->serializedEmail);
+    }
+
     /**************************************/
     /* GETTERS & SETTERS                  */
     /**************************************/
