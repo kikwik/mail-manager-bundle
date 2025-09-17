@@ -2,6 +2,8 @@
 
 namespace Kikwik\MailManagerBundle\Model;
 
+use Symfony\Component\Mime\Address;
+
 abstract class Template
 {
     /**************************************/
@@ -27,6 +29,11 @@ abstract class Template
     public function __toString(): string
     {
         return (string)$this->getName();
+    }
+
+    public function getSender(): Address
+    {
+        return new Address($this->getSenderEmail(), $this->getSenderName());
     }
 
     /**************************************/

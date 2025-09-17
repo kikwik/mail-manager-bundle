@@ -23,12 +23,12 @@ final class MailManager
     {
     }
 
-    public function composeAndSend(Address $recipient, string $templateName, array $context = []): void
+    public function composeAndSend(Address $recipient, string $templateName, array $context = [], array $carbonCopies = [], array $blindCarbonCopies = []): void
     {
-        $this->send($this->compose($recipient, $templateName, $context));
+        $this->send($this->compose($recipient, $templateName, $context, $carbonCopies, $blindCarbonCopies));
     }
 
-    public function compose(Address $recipient, string $templateName, array $context = [], bool $persistLog = false): ?LogInterface
+    public function compose(Address $recipient, string $templateName, array $context = [], array $carbonCopies = [], array $blindCarbonCopies = [], bool $persistLog = false): ?LogInterface
     {
         if(!$this->templateClass){
             // template_class is required
@@ -39,17 +39,19 @@ final class MailManager
             throw new \Exception('Log class not set, please define kikwik_mail_manager.log_class in config/packages/kikwik_mail_manager.yaml');
         }
 
+        // find the template
         $template = $this->entityManager->getRepository($this->templateClass)->findOneBy(['name' => $templateName]);
         if($template)
         {
             assert($template instanceof Template);
             if($template->isEnabled())
             {
-                // create a sender object
-                $sender = new Address($template->getSenderEmail(), $template->getSenderName());
+                // ensure that cc and bcc are array of Address objects
+                $carbonCopies = array_map(fn($item) => $item instanceof Address ? $item : new Address($item), $carbonCopies);
+                $blindCarbonCopies = array_map(fn($item) => $item instanceof Address ? $item : new Address($item), $blindCarbonCopies);
 
                 // add sender and recipient to context
-                $context['sender'] = $sender;
+                $context['sender'] = $template->getSender();
                 $context['recipient'] = $recipient;
 
                 // render the subject
@@ -62,10 +64,18 @@ final class MailManager
 
                 // compose the email
                 $email = (new Email())
-                    ->from($sender)
+                    ->from($template->getSender())
                     ->to($recipient)
                     ->subject($subject)
                     ->html($body);
+                foreach($carbonCopies as $carbonCopy)
+                {
+                    $email->addCC($carbonCopy);
+                }
+                foreach($blindCarbonCopies as $blindCarbonCopy)
+                {
+                    $email->addBcc($blindCarbonCopy);
+                }
 
                 // TODO: dispatch some event
 
@@ -73,10 +83,10 @@ final class MailManager
                 /** @var LogInterface $log */
                 $log = new $this->logClass();
                 $log
-                    ->setSender($sender->toString())
-                    ->setRecipient($recipient->toString())     // TODO multiple address here
-                    ->setCarbonCopy(null)           // TODO multiple address here
-                    ->setBlindCarbonCopy(null)  // TODO multiple address here
+                    ->setSender($template->getSender()->toString())
+                    ->setRecipient($recipient->toString())
+                    ->setCarbonCopy(implode(', ',array_map(fn($cc) => $cc->toString(), $carbonCopies)))
+                    ->setBlindCarbonCopy(implode(', ',array_map(fn($bcc) => $bcc->toString(), $blindCarbonCopies)))
                     ->setTemplateName($templateName)
                     ->setSubject($subject)
                     ->setSerializedEmail(serialize($email))
