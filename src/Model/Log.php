@@ -8,13 +8,13 @@ abstract class Log implements LogInterface
     /* PROPERTIES                         */
     /**************************************/
 
-    protected ?string $senderName = null;
+    protected ?string $sender = null;
 
-    protected ?string $senderEmail =  null;
+    protected ?string $recipient = null;
 
-    protected ?string $recipientName = null;
+    protected ?string $carbonCopy = null;
 
-    protected ?string $recipientEmail =  null;
+    protected ?string $blindCarbonCopy = null;
 
     protected ?string $templateName = null;
 
@@ -42,47 +42,48 @@ abstract class Log implements LogInterface
     /* GETTERS & SETTERS                  */
     /**************************************/
 
-    public function getSenderName(): ?string
+
+    public function getSender(): ?string
     {
-        return $this->senderName;
+        return $this->sender;
     }
 
-    public function setSenderName(?string $senderName): static
+    public function setSender(?string $sender): static
     {
-        $this->senderName = $senderName;
+        $this->sender = $sender;
         return $this;
     }
 
-    public function getSenderEmail(): ?string
+    public function getRecipient(): ?string
     {
-        return $this->senderEmail;
+        return $this->recipient;
     }
 
-    public function setSenderEmail(?string $senderEmail): static
+    public function setRecipient(?string $recipient): static
     {
-        $this->senderEmail = $senderEmail;
+        $this->recipient = $recipient;
         return $this;
     }
 
-    public function getRecipientName(): ?string
+    public function getCarbonCopy(): ?string
     {
-        return $this->recipientName;
+        return $this->carbonCopy;
     }
 
-    public function setRecipientName(?string $recipientName): static
+    public function setCarbonCopy(?string $carbonCopy): static
     {
-        $this->recipientName = $recipientName;
+        $this->carbonCopy = $carbonCopy;
         return $this;
     }
 
-    public function getRecipientEmail(): ?string
+    public function getBlindCarbonCopy(): ?string
     {
-        return $this->recipientEmail;
+        return $this->blindCarbonCopy;
     }
 
-    public function setRecipientEmail(?string $recipientEmail): static
+    public function setBlindCarbonCopy(?string $blindCarbonCopy): static
     {
-        $this->recipientEmail = $recipientEmail;
+        $this->blindCarbonCopy = $blindCarbonCopy;
         return $this;
     }
 
@@ -129,7 +130,4 @@ abstract class Log implements LogInterface
         $this->sendedAt = $sendedAt;
         return $this;
     }
-
-
-
 }

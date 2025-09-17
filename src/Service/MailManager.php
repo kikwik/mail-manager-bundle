@@ -72,13 +72,15 @@ final class MailManager
                 // create Log for email
                 /** @var LogInterface $log */
                 $log = new $this->logClass();
-                $log->setSenderName($sender->getName());
-                $log->setSenderEmail($sender->getAddress());
-                $log->setRecipientName($recipient->getName());
-                $log->setRecipientEmail($recipient->getAddress());
-                $log->setTemplateName($templateName);
-                $log->setSubject($subject);
-                $log->setSerializedEmail(serialize($email));
+                $log
+                    ->setSender($sender->toString())
+                    ->setRecipient($recipient->toString())     // TODO multiple address here
+                    ->setCarbonCopy(null)           // TODO multiple address here
+                    ->setBlindCarbonCopy(null)  // TODO multiple address here
+                    ->setTemplateName($templateName)
+                    ->setSubject($subject)
+                    ->setSerializedEmail(serialize($email))
+                ;
                 if($persistLog)
                 {
                     $this->entityManager->persist($log);
