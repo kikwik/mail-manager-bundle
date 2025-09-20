@@ -1,0 +1,38 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+
+{# @var emailObject \Symfony\Component\Mime\Email #}
+{% set emailObject = field.value %}
+
+{% if emailObject %}
+    {% if ea.crud.currentAction == 'detail' %}
+        {{ emailObject.htmlBody | raw }}
+    {% else %}
+        {% set html_id = 'ea-text-editor-' ~ field.uniqueId %}
+        <a href="#" data-bs-toggle="modal" data-bs-target="#{{ html_id }}">
+            <twig:ea:Icon name="internal:file-lines" /> {{ 'field.text_editor.view_content'|trans([], domain = 'EasyAdminBundle') }}
+        </a>
+
+        <div class="modal fade" id="{{ html_id }}" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ field.label|trans }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'action.close'|trans([], domain = 'EasyAdminBundle') }}">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <h4>{{ emailObject.getSubject }}</h4>
+                        <div>From: {% for from in emailObject.getFrom %}<span class="badge badge-info">{{ from.toString }}</span>{% endfor %}</div>
+                        <div>To: {% for to in emailObject.getTo %}<span class="badge badge-info">{{ to.toString }}</span>{% endfor %}</div>
+                        <div>Cc: {% for cc in emailObject.getCc %}<span class="badge badge-info">{{ cc.toString }}</span>{% endfor %}</div>
+                        <div>Bcc: {% for bcc in emailObject.getBcc %}<span class="badge badge-info">{{ bcc.toString }}</span>{% endfor %}</div>
+                        <hr/>
+                        {{ emailObject.htmlBody | raw }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}

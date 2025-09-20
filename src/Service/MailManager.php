@@ -23,12 +23,12 @@ final class MailManager
     {
     }
 
-    public function composeAndSend(Address $recipient, string $templateName, array $context = [], array $carbonCopies = [], array $blindCarbonCopies = []): void
+    public function composeAndSend(string $templateName, array $context, Address $recipient, array $carbonCopies = [], array $blindCarbonCopies = []): void
     {
-        $this->send($this->compose($recipient, $templateName, $context, $carbonCopies, $blindCarbonCopies));
+        $this->send($this->compose($templateName, $context, $recipient, $carbonCopies, $blindCarbonCopies));
     }
 
-    public function compose(Address $recipient, string $templateName, array $context = [], array $carbonCopies = [], array $blindCarbonCopies = [], bool $persistLog = false): ?LogInterface
+    public function compose(string $templateName, array $context, Address $recipient, array $carbonCopies = [], array $blindCarbonCopies = []): ?LogInterface
     {
         if(!$this->templateClass){
             // template_class is required
@@ -91,12 +91,6 @@ final class MailManager
                     ->setSubject($subject)
                     ->setSerializedEmail(serialize($email))
                 ;
-                if($persistLog)
-                {
-                    $this->entityManager->persist($log);
-                    $this->entityManager->flush();
-                }
-
                 return $log;
             }
         }

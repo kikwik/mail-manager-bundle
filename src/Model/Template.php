@@ -36,6 +36,8 @@ abstract class Template
         return new Address($this->getSenderEmail(), $this->getSenderName());
     }
 
+    abstract public static function getTemplateChoices(): array;
+
     /**************************************/
     /* GETTERS & SETTERS                  */
     /**************************************/

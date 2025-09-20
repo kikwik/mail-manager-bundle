@@ -43,6 +43,21 @@ class MailTemplate extends Template
     use IpTraceableEntity;
 
     /**************************************/
+    /* CONST for template choices         */
+    /**************************************/
+
+    const MODEL1 = 'model1';
+    const MODEL2 = 'model2';
+
+    public static function getTemplateChoices(): array
+    {
+        return [
+            'Model of type 1' => self::MODEL1,
+            'Model of type 2' => self::MODEL2,
+        ];
+    }
+
+    /**************************************/
     /* PROPERTIES                         */
     /**************************************/
 
@@ -133,30 +148,95 @@ final class MyController extends AbstractController
 {
     public function myAction(MailManager $mailManager)
     {
-        // This will create a new mail (not saved in database)
+        // This will create a new unpersisted entity of class \Kikwik\MailManagerBundle\Model\LogInterface (or null if the template does not exists or is not active)
         $mail = $mailManager->compose(
-            new Address('test@example.com','My customer'),
-            'my_template_name',
-            ['my_param' => 'my_value']
+            'my_template_name',                                 // template name
+            ['my_param' => 'my_value']                          // context
+            new Address('test@example.com','My customer'),      // recipient (to)
+            ['test-cc@example.com'],                            // carbonCopies (cc)
+            ['test-bcc@example.com']                            // blindCarbonCopies (bcc)
         ); 
     
-        // This will create a new mail and persist and flush into the database (sendedAt will be null)
-        $mail = $mailManager->compose(
-            new Address('test@example.com','My customer'),
-            'my_template_name',
-            ['my_param' => 'my_value'],
-            true
-        ); 
-        
         // This will send a previously created email (will be persisted and flush into the database, sendedAt will be filled with the current datetime)
         $mailManager->send($mail); 
     
         // This will create, persist and send email
         $mailManager->composeAndSend(
-            new Address('test@example.com','My customer'),
-            'my_template_name',
-            ['my_param' => 'my_value']
+            'my_template_name',                                 // template name
+            ['my_param' => 'my_value']                          // context
+            new Address('test@example.com','My customer'),      // recipient (to)
+            ['test-cc@example.com'],                            // carbonCopies (cc)
+            ['test-bcc@example.com']                            // blindCarbonCopies (bcc)
         ); 
+    }
+}
+```
+
+
+EasyAdmin
+---------
+
+You can use the `Kikwik\MailManagerBundle\EasyAdmin\KikwikMailLogCrudControllerTrait` 
+and `Kikwik\MailManagerBundle\EasyAdmin\KikwikMailTemplateCrudControllerTrait` 
+to add a custom crud controller for `MailLog` and `MailTemplate` entities:
+
+```php
+# src/Controller/Admin/Mail/MailTemplateCrudController.php
+namespace App\Controller\Admin\Mail;
+
+use App\Entity\Mail\MailTemplate;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use Kikwik\MailManagerBundle\EasyAdmin\KikwikMailTemplateCrudControllerTrait;
+
+class MailTemplateCrudController extends AbstractCrudController
+{
+    use KikwikMailTemplateCrudControllerTrait;
+
+    public static function getEntityFqcn(): string
+    {
+        return MailTemplate::class;
+    }
+
+    public function configureFields(string $pageName): iterable
+    {
+        return $this->getDefaultFieldList(MailTemplate::getTemplateChoices());
+    }
+
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $this->addDefaultFilters($filters);
+    }
+}
+```
+
+```php
+# src/Controller/Admin/Mail/MailLogCrudController.php
+namespace App\Controller\Admin\Mail;
+
+use App\Entity\Mail\MailLog;
+use App\Entity\Mail\MailTemplate;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use Kikwik\MailManagerBundle\EasyAdmin\KikwikMailLogCrudControllerTrait;
+
+class MailTemplateCrudController extends AbstractCrudController
+{
+    use KikwikMailLogCrudControllerTrait;
+
+    public static function getEntityFqcn(): string
+    {
+        return MailLog::class;
+    }
+
+    public function configureFields(string $pageName): iterable
+    {
+        return $this->getDefaultFieldList();
+    }
+
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $this->addDefaultFilters($filters, MailTemplate::getTemplateChoices());
     }
 }
 ```
