@@ -3,6 +3,7 @@
 namespace Kikwik\MailManagerBundle;
 
 use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappingsPass;
+use Kikwik\MailManagerBundle\Model\Decorator;
 use Kikwik\MailManagerBundle\Model\Log;
 use Kikwik\MailManagerBundle\Model\Template;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -34,6 +35,15 @@ final class KikwikMailManagerBundle extends AbstractBundle
                         ->thenInvalid('The log_class %s must extend Kikwik\MailManagerBundle\Model\Log.')
                     ->end()
                 ->end()
+                ->stringNode('decorator_class')
+                    ->info('The class name of your Decorator entity.')
+                    ->example('App\Entity\Mail\MailDecorator')
+                    ->defaultNull()
+                    ->validate()
+                        ->ifTrue(fn ($v) => !is_a($v, Decorator::class, true))
+                        ->thenInvalid('The decorator_class %s must extend Kikwik\MailManagerBundle\Model\Decorator.')
+                    ->end()
+                ->end()
             ->end()
         ;
     }
@@ -45,7 +55,8 @@ final class KikwikMailManagerBundle extends AbstractBundle
         // set parameters value to the MailManager service
         $builder->getDefinition('kikwik_mail_manager.service.mail_manager')
             ->setArgument(0, $config['template_class'])
-            ->setArgument(1, $config['log_class'])
+            ->setArgument(1, $config['decorator_class'])
+            ->setArgument(2, $config['log_class'])
         ;
     }
 

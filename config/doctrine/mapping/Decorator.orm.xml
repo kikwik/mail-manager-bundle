@@ -3,13 +3,9 @@
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
-    <mapped-superclass name="Kikwik\MailManagerBundle\Model\Template">
+    <mapped-superclass name="Kikwik\MailManagerBundle\Model\Decorator">
         <field name="name" type="string" unique="true" />
-        <field name="isEnabled" type="boolean" />
-        <field name="senderName" type="string" />
-        <field name="senderEmail" type="string" />
-        <field name="subject" type="string" />
-        <field name="decoratorName" type="string" />
-        <field name="content" type="text" />
+        <field name="header" type="text" />
+        <field name="footer" type="text" />
     </mapped-superclass>
 </doctrine-mapping>

@@ -3,6 +3,7 @@
 namespace Kikwik\MailManagerBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Kikwik\MailManagerBundle\Model\Decorator;
 use Kikwik\MailManagerBundle\Model\LogInterface;
 use Kikwik\MailManagerBundle\Model\Template;
 use Symfony\Component\Mailer\MailerInterface;
@@ -15,6 +16,7 @@ final class MailManager
 
     public function __construct(
         private ?string $templateClass,
+        private ?string $decoratorClass,
         private ?string $logClass,
         private readonly EntityManagerInterface $entityManager,
         public readonly Environment $twig,
@@ -58,9 +60,23 @@ final class MailManager
                 $subjectTemplate = $this->twig->createTemplate($template->getSubject());
                 $subject = $subjectTemplate->render($context);
 
-                // render the body
-                $bodyTemplate = $this->twig->createTemplate($template->getBody());
-                $body = $bodyTemplate->render($context);
+                // render the content
+                $contentTemplate = $this->twig->createTemplate($template->getContent());
+                $content = $contentTemplate->render($context);
+
+                // decorate the content
+                $decoratorTemplate = $this->twig->createTemplate('{{ content|raw }}');
+                if($this->decoratorClass && $template->getDecoratorName())
+                {
+                    // find the decorator
+                    $decorator = $this->entityManager->getRepository($this->decoratorClass)->findOneBy(['name' => $template->getDecoratorName()]);
+                    if($decorator)
+                    {
+                        assert($decorator instanceof Decorator);
+                        $decoratorTemplate = $this->twig->createTemplate(sprintf('%s{{ content|raw }}%s', $decorator->getHeader(), $decorator->getFooter()));;
+                    }
+                }
+                $body = $decoratorTemplate->render(['content' => $content]);
 
                 // compose the email
                 $email = (new Email())

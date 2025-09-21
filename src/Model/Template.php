@@ -20,7 +20,9 @@ abstract class Template
 
     protected ?string $subject = null;
 
-    protected ?string $body = null;
+    protected ?string $decoratorName = null;
+
+    protected ?string $content = null;
 
     /**************************************/
     /* CUSTOM METHODS                     */
@@ -97,14 +99,27 @@ abstract class Template
         return $this;
     }
 
-    public function getBody(): ?string
+    public function getDecoratorName(): ?string
     {
-        return $this->body;
+        return $this->decoratorName;
     }
 
-    public function setBody(?string $body): static
+    public function setDecoratorName(?string $decoratorName): static
     {
-        $this->body = $body;
+        $this->decoratorName = $decoratorName;
+        return $this;
+    }
+
+
+
+    public function getContent(): ?string
+    {
+        return $this->content;
+    }
+
+    public function setContent(?string $content): static
+    {
+        $this->content = $content;
         return $this;
     }
 

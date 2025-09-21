@@ -17,7 +17,7 @@ of the Composer documentation.
 $ composer require kikwik/mail-manager-bundle
 ```
 
-2. Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Template` and `Kikwik\MailManagerBundle\Model\Log`:
+2. Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Template`:
 
 ```php
 # src/Entity/Mail/Template.php
@@ -77,6 +77,55 @@ class MailTemplate extends Template
 }
 ```
 
+3. (optional) Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Decorator`:
+
+
+```php
+<?php
+
+namespace App\Entity\Mail;
+
+use App\Repository\Mail\MailDecoratorRepository;
+use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Blameable\Traits\BlameableEntity;
+use Gedmo\IpTraceable\Traits\IpTraceableEntity;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Kikwik\MailManagerBundle\Model\Decorator;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
+#[ORM\Entity(repositoryClass: MailDecoratorRepository::class)]
+#[ORM\Table('mail_decorator')]
+#[UniqueEntity(fields: ['name'])]
+class MailDecorator extends Decorator
+{
+    use TimestampableEntity;
+    use BlameableEntity;
+    use IpTraceableEntity;
+
+    /**************************************/
+    /* PROPERTIES                         */
+    /**************************************/
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    /**************************************/
+    /* GETTERS & SETTERS                  */
+    /**************************************/
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+}
+
+```
+
+4. (optional) Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Log`:
+
+
 ```php
 # src/Entity/Mail/Log.php
 <?php
@@ -118,15 +167,16 @@ class MailLog extends Log
 }
 ```
 
-3. Configure the bundle in `config/packages/kikwik_mail_manager.yaml`:
+5. Configure the bundle in `config/packages/kikwik_mail_manager.yaml`:
 
 ```yaml
 kikwik_mail_manager:
-    template_class: App\Entity\Mail\MailTemplate
-    log_class:      App\Entity\Mail\MailLog
+    template_class:     App\Entity\Mail\MailTemplate
+    decorator_class:    App\Entity\Mail\MailDecorator   
+    log_class:          App\Entity\Mail\MailLog
 ```
 
-4. Update the database to create the tables for entities provided by the bundle:
+6. Update the database to create the tables for entities provided by the bundle:
 
 ```console
 $ php bin/console make:migration
@@ -178,7 +228,8 @@ EasyAdmin
 
 You can use the `Kikwik\MailManagerBundle\EasyAdmin\KikwikMailLogCrudControllerTrait` 
 and `Kikwik\MailManagerBundle\EasyAdmin\KikwikMailTemplateCrudControllerTrait` 
-to add a custom crud controller for `MailLog` and `MailTemplate` entities:
+and `Kikwik\MailManagerBundle\EasyAdmin\KikwikMailDecoratorCrudControllerTrait`
+to add a custom crud controller for `MailLog` and `MailTemplate` and `MailDecorator` entities:
 
 ```php
 # src/Controller/Admin/Mail/MailTemplateCrudController.php
@@ -208,6 +259,32 @@ class MailTemplateCrudController extends AbstractCrudController
         return $this->addDefaultFilters($filters);
     }
 }
+```
+
+```php
+<?php
+
+namespace App\Controller\Admin\Mail;
+
+use App\Entity\Mail\MailDecorator;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use Kikwik\MailManagerBundle\EasyAdmin\KikwikMailDecoratorCrudControllerTrait;
+
+class MailDecoratorCrudController extends AbstractCrudController
+{
+    use KikwikMailDecoratorCrudControllerTrait;
+
+    public static function getEntityFqcn(): string
+    {
+        return MailDecorator::class;
+    }
+
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $this->addDefaultFilters($filters);
+    }
+}
+
 ```
 
 ```php
