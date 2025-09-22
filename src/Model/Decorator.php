@@ -2,12 +2,17 @@
 
 namespace Kikwik\MailManagerBundle\Model;
 
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
+
+#[UniqueEntity(fields: ['name'])]
 class Decorator
 {
     /**************************************/
     /* PROPERTIES                         */
     /**************************************/
 
+    #[Assert\NotBlank()]
     protected ?string $name = null;
 
     protected ?string $header = null;

@@ -84,6 +84,10 @@ final class MailManager
                     ->to($recipient)
                     ->subject($subject)
                     ->html($body);
+                if($template->getReplyToEmail())
+                {
+                    $email->replyTo($template->getReplyToEmail());
+                }
                 foreach($carbonCopies as $carbonCopy)
                 {
                     $email->addCC($carbonCopy);
@@ -93,20 +97,14 @@ final class MailManager
                     $email->addBcc($blindCarbonCopy);
                 }
 
-                // TODO: dispatch some event
+                // TODO: dispatch some event to allow to modify the email object
 
                 // create Log for email
-                /** @var LogInterface $log */
-                $log = new $this->logClass();
-                $log
-                    ->setSender($template->getSender()->toString())
-                    ->setRecipient($recipient->toString())
-                    ->setCarbonCopy(implode(', ',array_map(fn($cc) => $cc->toString(), $carbonCopies)))
-                    ->setBlindCarbonCopy(implode(', ',array_map(fn($bcc) => $bcc->toString(), $blindCarbonCopies)))
-                    ->setTemplateName($templateName)
-                    ->setSubject($subject)
-                    ->setSerializedEmail(serialize($email))
-                ;
+                $logClass = $this->logClass;
+                assert($logClass instanceof LogInterface);
+                $log = $logClass::createFromEmail($email);
+                $log->setTemplateName($templateName);
+
                 return $log;
             }
         }

@@ -7,7 +7,7 @@ use App\Repository\Mail\MailDecoratorRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CodeEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 trait KikwikMailTemplateCrudControllerTrait
@@ -26,9 +26,10 @@ trait KikwikMailTemplateCrudControllerTrait
             BooleanField::new('isEnabled'),
             TextField::new('senderName'),
             TextField::new('senderEmail'),
+            TextField::new('replyToEmail'),
             TextField::new('subject'),
             ChoiceField::new('decoratorName')->setChoices($decoratorChoices),
-            TextEditorField::new('content')->setTemplatePath('@KikwikMailManager/easy-admin/text_editor_raw.html.twig'),
+            CodeEditorField::new('content')->setTemplatePath('@KikwikMailManager/easy-admin/code_editor_with_preview.html.twig'),
         ];
     }
 

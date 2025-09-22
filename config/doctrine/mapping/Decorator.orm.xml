@@ -5,7 +5,7 @@
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <mapped-superclass name="Kikwik\MailManagerBundle\Model\Decorator">
         <field name="name" type="string" unique="true" />
-        <field name="header" type="text" />
-        <field name="footer" type="text" />
+        <field name="header" type="text" nullable="true" />
+        <field name="footer" type="text" nullable="true" />
     </mapped-superclass>
 </doctrine-mapping>

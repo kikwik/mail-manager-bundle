@@ -2,6 +2,7 @@
 
 namespace Kikwik\MailManagerBundle\EasyAdmin;
 
+use EasyCorp\Bundle\EasyAdminBundle\Field\CodeEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
@@ -11,8 +12,8 @@ trait KikwikMailDecoratorCrudControllerTrait
     {
         return [
             TextField::new('name'),
-            TextEditorField::new('header')->setTemplatePath('@KikwikMailManager/easy-admin/text_editor_raw.html.twig'),
-            TextEditorField::new('footer')->setTemplatePath('@KikwikMailManager/easy-admin/text_editor_raw.html.twig'),
+            CodeEditorField::new('header')->setTemplatePath('@KikwikMailManager/easy-admin/code_editor_with_preview.html.twig'),
+            CodeEditorField::new('footer')->setTemplatePath('@KikwikMailManager/easy-admin/code_editor_with_preview.html.twig'),
         ];
     }
 }

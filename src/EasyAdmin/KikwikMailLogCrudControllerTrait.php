@@ -22,6 +22,7 @@ trait KikwikMailLogCrudControllerTrait
     {
         return [
             TextField::new('sender')->hideOnForm(),
+            TextField::new('replyTo')->hideOnForm(),
             TextField::new('recipient')->hideOnForm(),
             TextField::new('carbonCopy')->hideOnForm(),
             TextField::new('blindCarbonCopy')->hideOnForm(),

@@ -4,13 +4,14 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <mapped-superclass name="Kikwik\MailManagerBundle\Model\Log">
-        <field name="sender" type="string" nullable="true"/>
-        <field name="recipient" type="text" nullable="true"/>
-        <field name="carbonCopy" type="text" nullable="true"/>
-        <field name="blindCarbonCopy" type="text" nullable="true"/>
-        <field name="templateName" type="string" />
+        <field name="sender" type="string" nullable="true" />
+        <field name="recipient" type="text" nullable="true" />
+        <field name="carbonCopy" type="text" nullable="true" />
+        <field name="blindCarbonCopy" type="text" nullable="true" />
+        <field name="replyTo" type="string" nullable="true" />
+        <field name="templateName" type="string" nullable="true" />
         <field name="subject" type="string" />
         <field name="serializedEmail" type="text" />
-        <field name="sendedAt" type="datetime_immutable" nullable="true"/>
+        <field name="sendedAt" type="datetime_immutable" nullable="true" />
     </mapped-superclass>
 </doctrine-mapping>

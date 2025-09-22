@@ -6,10 +6,11 @@
     <mapped-superclass name="Kikwik\MailManagerBundle\Model\Template">
         <field name="name" type="string" unique="true" />
         <field name="isEnabled" type="boolean" />
-        <field name="senderName" type="string" />
+        <field name="senderName" type="string" nullable="true" />
         <field name="senderEmail" type="string" />
+        <field name="replyToEmail" type="string" nullable="true" />
         <field name="subject" type="string" />
-        <field name="decoratorName" type="string" />
+        <field name="decoratorName" type="string" nullable="true" />
         <field name="content" type="text" />
     </mapped-superclass>
 </doctrine-mapping>

@@ -2,26 +2,37 @@
 
 namespace Kikwik\MailManagerBundle\Model;
 
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Validator\Constraints as Assert;
 
+#[UniqueEntity(fields: ['name'])]
 abstract class Template
 {
     /**************************************/
     /* PROPERTIES                         */
     /**************************************/
 
+    #[Assert\NotBlank()]
     protected ?string $name = null;
 
     protected bool $isEnabled = true;
 
     protected ?string $senderName = null;
 
+    #[Assert\NotBlank()]
+    #[Assert\Email()]
     protected ?string $senderEmail =  null;
 
+    #[Assert\Email()]
+    protected ?string $replyToEmail =  null;
+
+    #[Assert\NotBlank()]
     protected ?string $subject = null;
 
     protected ?string $decoratorName = null;
 
+    #[Assert\NotBlank()]
     protected ?string $content = null;
 
     /**************************************/
@@ -85,6 +96,17 @@ abstract class Template
     public function setSenderEmail(?string $senderEmail): static
     {
         $this->senderEmail = $senderEmail;
+        return $this;
+    }
+
+    public function getReplyToEmail(): ?string
+    {
+        return $this->replyToEmail;
+    }
+
+    public function setReplyToEmail(?string $replyToEmail): static
+    {
+        $this->replyToEmail = $replyToEmail;
         return $this;
     }
 

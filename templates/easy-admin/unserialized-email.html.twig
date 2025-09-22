@@ -24,10 +24,11 @@
                     </div>
                     <div class="modal-body">
                         <h4>{{ emailObject.getSubject }}</h4>
-                        <div>From: {% for from in emailObject.getFrom %}<span class="badge badge-info">{{ from.toString }}</span>{% endfor %}</div>
-                        <div>To: {% for to in emailObject.getTo %}<span class="badge badge-info">{{ to.toString }}</span>{% endfor %}</div>
-                        <div>Cc: {% for cc in emailObject.getCc %}<span class="badge badge-info">{{ cc.toString }}</span>{% endfor %}</div>
-                        <div>Bcc: {% for bcc in emailObject.getBcc %}<span class="badge badge-info">{{ bcc.toString }}</span>{% endfor %}</div>
+                        <div><span style="width: 70px;display: inline-block;">From:</span> {% for from in emailObject.getFrom %}<span class="badge badge-info">{{ from.toString }}</span>{% endfor %}</div>
+                        <div><span style="width: 70px;display: inline-block;">ReplyTo:</span> {% for replyTo in emailObject.getReplyTo %}<span class="badge badge-info">{{ replyTo.toString }}</span>{% endfor %}</div>
+                        <div><span style="width: 70px;display: inline-block;">To:</span> {% for to in emailObject.getTo %}<span class="badge badge-info">{{ to.toString }}</span>{% endfor %}</div>
+                        <div><span style="width: 70px;display: inline-block;">Cc:</span> {% for cc in emailObject.getCc %}<span class="badge badge-info">{{ cc.toString }}</span>{% endfor %}</div>
+                        <div><span style="width: 70px;display: inline-block;">Bcc:</span> {% for bcc in emailObject.getBcc %}<span class="badge badge-info">{{ bcc.toString }}</span>{% endfor %}</div>
                         <hr/>
                         {{ emailObject.htmlBody | raw }}
                     </div>
