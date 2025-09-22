@@ -25,9 +25,19 @@ final class MailManager
     {
     }
 
-    public function composeAndSend(string $templateName, array $context, Address $recipient, array $carbonCopies = [], array $blindCarbonCopies = []): void
+    public function composeAndSend(string $templateName, array $context, Address $recipient, array $carbonCopies = [], array $blindCarbonCopies = []): ?LogInterface
     {
-        $this->send($this->compose($templateName, $context, $recipient, $carbonCopies, $blindCarbonCopies));
+        $mailLog = $this->compose($templateName, $context, $recipient, $carbonCopies, $blindCarbonCopies);
+        $this->send($mailLog);
+        return $mailLog;
+    }
+
+    public function composeSendAndPersist(string $templateName, array $context, Address $recipient, array $carbonCopies = [], array $blindCarbonCopies = []): ?LogInterface
+    {
+        $mailLog = $this->compose($templateName, $context, $recipient, $carbonCopies, $blindCarbonCopies);
+        $this->send($mailLog);
+        $this->persist($mailLog);
+        return $mailLog;
     }
 
     public function compose(string $templateName, array $context, Address $recipient, array $carbonCopies = [], array $blindCarbonCopies = []): ?LogInterface
@@ -125,6 +135,13 @@ final class MailManager
 
             // save the date in the lof
             $log->setSendedAt(new \DateTimeImmutable());
+        }
+    }
+
+    public function persist(?LogInterface $log): void
+    {
+        if($log)
+        {
             $this->entityManager->persist($log);
             $this->entityManager->flush();
         }

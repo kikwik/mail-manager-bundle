@@ -207,11 +207,23 @@ final class MyController extends AbstractController
             ['test-bcc@example.com']                            // blindCarbonCopies (bcc)
         ); 
     
-        // This will send a previously created email (will be persisted and flush into the database, sendedAt will be filled with the current datetime)
+        // This will send a previously created email (sendedAt will be filled with the current datetime)
         $mailManager->send($mail); 
-    
-        // This will create, persist and send email
+        
+        // This will persist and flush email into the database
+        $mailManager->persist($mail);
+         
+        // This will create and send email (will not be persisted)
         $mailManager->composeAndSend(
+            'my_template_name',                                 // template name
+            ['my_param' => 'my_value']                          // context
+            new Address('test@example.com','My customer'),      // recipient (to)
+            ['test-cc@example.com'],                            // carbonCopies (cc)
+            ['test-bcc@example.com']                            // blindCarbonCopies (bcc)
+        ); 
+         
+        // This will create, send and persist email
+        $mailManager->composeSendAndPersist(
             'my_template_name',                                 // template name
             ['my_param' => 'my_value']                          // context
             new Address('test@example.com','My customer'),      // recipient (to)
