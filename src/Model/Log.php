@@ -4,7 +4,7 @@ namespace Kikwik\MailManagerBundle\Model;
 
 use Symfony\Component\Mime\Email;
 
-abstract class Log implements LogInterface
+abstract class Log
 {
     /**************************************/
     /* PROPERTIES                         */

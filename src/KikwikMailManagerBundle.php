@@ -52,14 +52,7 @@ final class KikwikMailManagerBundle extends AbstractBundle
     {
         $container->import('../config/services.php');
 
-        // set parameters value to the MailManager service
-        $builder->getDefinition('kikwik_mail_manager.service.mail_manager') // todo: remove this
-            ->setArgument(0, $config['template_class'])
-            ->setArgument(1, $config['decorator_class'])
-            ->setArgument(2, $config['log_class'])
-        ;
-
-        // set parameters value to the MailBuilderFactory service
+        // set parameter values to the MailBuilderFactory service
         $builder->getDefinition('kikwik_mail_manager.service.mail_builder_factory')
             ->setArgument(0, $config['template_class'])
             ->setArgument(1, $config['decorator_class'])
