@@ -53,6 +53,20 @@ abstract class Log implements LogInterface
 
     }
 
+    public function fromEmail(Email $email): static
+    {
+        $this
+            ->setSender($email->getFrom() ? implode(', ', array_map(fn($from) => $from->toString(), $email->getFrom())) : null)
+            ->setRecipient($email->getTo() ? implode(', ', array_map(fn($to) => $to->toString(), $email->getTo())) : null)
+            ->setCarbonCopy($email->getCc() ? implode(', ', array_map(fn($cc) => $cc->toString(), $email->getCc())) : null)
+            ->setBlindCarbonCopy($email->getBcc() ? implode(', ', array_map(fn($bcc) => $bcc->toString(), $email->getBcc())) : null)
+            ->setReplyTo($email->getReplyTo() ? implode(', ', array_map(fn($replyTo) => $replyTo->toString(), $email->getReplyTo())) : null)
+            ->setSubject($email->getSubject())
+            ->setSerializedEmail(serialize($email));
+
+        return $this;
+    }
+
     public function getUnserializedEmail()
     {
         return unserialize($this->serializedEmail);

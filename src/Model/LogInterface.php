@@ -4,6 +4,10 @@ namespace Kikwik\MailManagerBundle\Model;
 
 use Symfony\Component\Mime\Email;
 
+/**
+ * @deprecated This class is deprecated and will be removed in a future version.
+ *             Please use the MailBuilderFactory or similar functionality for managing mail-related operations.
+ */
 interface LogInterface
 {
     public static function createFromEmail(Email $email): static;

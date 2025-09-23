@@ -6,11 +6,15 @@ use Doctrine\ORM\EntityManagerInterface;
 use Kikwik\MailManagerBundle\Model\Decorator;
 use Kikwik\MailManagerBundle\Model\LogInterface;
 use Kikwik\MailManagerBundle\Model\Template;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 use Twig\Environment;
 
+/**
+ * @deprecated This class is deprecated and will be removed in a future version.
+ *             Please use the MailBuilderFactory or similar functionality for managing mail-related operations.
+ */
 final class MailManager
 {
 
@@ -19,7 +23,7 @@ final class MailManager
         private ?string $decoratorClass,
         private ?string $logClass,
         private readonly EntityManagerInterface $entityManager,
-        public readonly Environment $twig,
+        private readonly Environment $twig,
         private readonly MailerInterface $mailer,
     )
     {
@@ -62,10 +66,6 @@ final class MailManager
                 $carbonCopies = array_map(fn($item) => $item instanceof Address ? $item : new Address($item), $carbonCopies);
                 $blindCarbonCopies = array_map(fn($item) => $item instanceof Address ? $item : new Address($item), $blindCarbonCopies);
 
-                // add sender and recipient to context
-                $context['sender'] = $template->getSender();
-                $context['recipient'] = $recipient;
-
                 // render the subject
                 $subjectTemplate = $this->twig->createTemplate($template->getSubject());
                 $subject = $subjectTemplate->render($context);
@@ -89,7 +89,7 @@ final class MailManager
                 $body = $decoratorTemplate->render(['content' => $content]);
 
                 // compose the email
-                $email = (new Email())
+                $email = (new TemplatedEmail())
                     ->from($template->getSender())
                     ->to($recipient)
                     ->subject($subject)

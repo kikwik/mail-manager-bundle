@@ -17,10 +17,14 @@ of the Composer documentation.
 $ composer require kikwik/mail-manager-bundle
 ```
 
-2. Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Template`:
+
+Configuration
+-------------
+
+
+1. Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Template`:
 
 ```php
-# src/Entity/Mail/Template.php
 <?php
 
 namespace App\Entity\Mail;
@@ -77,7 +81,7 @@ class MailTemplate extends Template
 }
 ```
 
-3. (optional) Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Decorator`:
+2. (optional) Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Decorator`:
 
 
 ```php
@@ -123,11 +127,10 @@ class MailDecorator extends Decorator
 
 ```
 
-4. (optional) Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Log`:
+3. (optional) Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Log`:
 
 
 ```php
-# src/Entity/Mail/Log.php
 <?php
 
 namespace App\Entity\Mail;
@@ -167,7 +170,7 @@ class MailLog extends Log
 }
 ```
 
-5. Configure the bundle in `config/packages/kikwik_mail_manager.yaml`:
+4. Configure the bundle in `config/packages/kikwik_mail_manager.yaml`:
 
 ```yaml
 kikwik_mail_manager:
@@ -176,7 +179,7 @@ kikwik_mail_manager:
     log_class:          App\Entity\Mail\MailLog
 ```
 
-6. Update the database to create the tables for entities provided by the bundle:
+5. Update the database to create the tables for entities provided by the bundle:
 
 ```console
 $ php bin/console make:migration
@@ -184,52 +187,49 @@ $ php bin/console doctrine:migrations:migrate
 ```
 
 
-Configuration
--------------
-
 
 Usage
 -----
 
-Autowire the `Kikwik\MailManagerBundle\Service\MailManager` service and call the `compose`, `send` or `composeAndSend` method:
+Autowire the `Kikwik\MailManagerBundle\Service\MailBuilderFactory` service and call the `createMailBuilder` method,
+then use the returned `Kikwik\MailManagerBundle\Service\MailBuilder` object to compose and send emails:
 
 ```php
 final class MyController extends AbstractController
 {
-    public function myAction(MailManager $mailManager)
+    public function myAction(MailBuilderFactory $mailBuilderFactory)
     {
-        // This will create a new unpersisted entity of class \Kikwik\MailManagerBundle\Model\LogInterface (or null if the template does not exists or is not active)
-        $mail = $mailManager->compose(
-            'my_template_name',                                 // template name
-            ['my_param' => 'my_value']                          // context
-            new Address('test@example.com','My customer'),      // recipient (to)
-            ['test-cc@example.com'],                            // carbonCopies (cc)
-            ['test-bcc@example.com']                            // blindCarbonCopies (bcc)
-        ); 
-    
-        // This will send a previously created email (sendedAt will be filled with the current datetime)
-        $mailManager->send($mail); 
+        // Example 1 - create, send and persist
+        // create the MailBuilder object (it will be null if the template does not exists or is not enabled)
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name', new Address('sales@customer.com','My customer')))
+        {
+            $mailBuilder->getLog()->setSomethigCustom($myObject); // set a custom property defined in your App\Entity\Mail\MailLog entity
+            $mailBuilder
+                ->context(['attivazione'=>$richiesta])                      // set context
+                ->cc(['info@customer.com'])                                 // set cc
+                ->bcc(['admin@mycompany.com', 'helpdesk@mycompany.com'])    // set bcc
+                ->sendEmail()                                               // send the email (Log::sendedAt will be filled with the current datetime)
+                ->persistLog()                                              // save App\Entity\Mail\MailLog in the database (a flush is called)
+            ;
+        }
         
-        // This will persist and flush email into the database
-        $mailManager->persist($mail);
-         
-        // This will create and send email (will not be persisted)
-        $mailManager->composeAndSend(
-            'my_template_name',                                 // template name
-            ['my_param' => 'my_value']                          // context
-            new Address('test@example.com','My customer'),      // recipient (to)
-            ['test-cc@example.com'],                            // carbonCopies (cc)
-            ['test-bcc@example.com']                            // blindCarbonCopies (bcc)
-        ); 
-         
-        // This will create, send and persist email
-        $mailManager->composeSendAndPersist(
-            'my_template_name',                                 // template name
-            ['my_param' => 'my_value']                          // context
-            new Address('test@example.com','My customer'),      // recipient (to)
-            ['test-cc@example.com'],                            // carbonCopies (cc)
-            ['test-bcc@example.com']                            // blindCarbonCopies (bcc)
-        ); 
+        // Example 2 - persist the log without send email
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name', new Address('customer@example.com','My customer')))
+        {
+            $mailBuilder
+                ->context(['attivazione'=>$richiesta])
+                ->persistLog()
+            ;
+        }
+
+        // Example 3 - send email without persist the log
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name', new Address('customer@example.com','My customer')))
+        {
+            $mailBuilder
+                ->context(['attivazione'=>$richiesta])
+                ->sendEmail()
+            ;
+        }
     }
 }
 ```
@@ -244,7 +244,8 @@ and `Kikwik\MailManagerBundle\EasyAdmin\KikwikMailDecoratorCrudControllerTrait`
 to add a custom crud controller for `MailLog` and `MailTemplate` and `MailDecorator` entities:
 
 ```php
-# src/Controller/Admin/Mail/MailTemplateCrudController.php
+<?php
+
 namespace App\Controller\Admin\Mail;
 
 use App\Entity\Mail\MailTemplate;
@@ -300,7 +301,8 @@ class MailDecoratorCrudController extends AbstractCrudController
 ```
 
 ```php
-# src/Controller/Admin/Mail/MailLogCrudController.php
+<?php
+
 namespace App\Controller\Admin\Mail;
 
 use App\Entity\Mail\MailLog;

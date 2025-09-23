@@ -2,11 +2,12 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Kikwik\MailManagerBundle\Service\MailBuilderFactory;
 use Kikwik\MailManagerBundle\Service\MailManager;
 
 return static function (ContainerConfigurator $container): void {
     $container->services()
-        ->set('kikwik_mail_manager.service.mail_manager', MailManager::class)
+        ->set('kikwik_mail_manager.service.mail_manager', MailManager::class)  // todo: remove this
             ->args([
                 abstract_arg('Template class'),
                 abstract_arg('Decorator class'),
@@ -16,5 +17,18 @@ return static function (ContainerConfigurator $container): void {
                 service('mailer'),
             ])
         ->alias(MailManager::class, 'kikwik_mail_manager.service.mail_manager')
+    ;
+
+    $container->services()
+        ->set('kikwik_mail_manager.service.mail_builder_factory', MailBuilderFactory::class)
+        ->args([
+            abstract_arg('Template class'),
+            abstract_arg('Decorator class'),
+            abstract_arg('Log class'),
+            service('doctrine.orm.entity_manager'),
+            service('twig'),
+            service('mailer'),
+        ])
+        ->alias(MailBuilderFactory::class, 'kikwik_mail_manager.service.mail_builder_factory')
     ;
 };
