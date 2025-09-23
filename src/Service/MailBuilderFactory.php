@@ -12,8 +12,6 @@ use Twig\Environment;
 
 class MailBuilderFactory
 {
-
-
     public function __construct(
         private ?string $templateClass,
         private ?string $decoratorClass,

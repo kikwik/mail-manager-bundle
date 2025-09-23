@@ -21,8 +21,8 @@ $ composer require kikwik/mail-manager-bundle
 Configuration
 -------------
 
-
-1. Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Template`:
+1. Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Template`.
+    The static `getTemplateChoices` method can be used to list the available templates defined in the system (inside the easyadmin controllers)
 
 ```php
 <?php
@@ -127,7 +127,7 @@ class MailDecorator extends Decorator
 
 ```
 
-3. (optional) Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Log`:
+3. Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Log`:
 
 
 ```php
@@ -203,7 +203,7 @@ final class MyController extends AbstractController
         // create the MailBuilder object (it will be null if the template does not exists or is not enabled)
         if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name', new Address('sales@customer.com','My customer')))
         {
-            $mailBuilder->getLog()->setSomethigCustom($myObject); // set a custom property defined in your App\Entity\Mail\MailLog entity
+            $mailBuilder->getLog()->setSomethingCustom($myObject); // set a custom property defined in your App\Entity\Mail\MailLog entity
             $mailBuilder
                 ->context(['attivazione'=>$richiesta])                      // set context
                 ->cc(['info@customer.com'])                                 // set cc
@@ -214,7 +214,7 @@ final class MyController extends AbstractController
         }
         
         // Example 2 - persist the log without send email
-        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name', new Address('customer@example.com','My customer')))
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name', new Address('sales@customer.com','My customer')))
         {
             $mailBuilder
                 ->context(['attivazione'=>$richiesta])
@@ -223,7 +223,7 @@ final class MyController extends AbstractController
         }
 
         // Example 3 - send email without persist the log
-        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name', new Address('customer@example.com','My customer')))
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name', new Address('sales@customer.com','My customer')))
         {
             $mailBuilder
                 ->context(['attivazione'=>$richiesta])
