@@ -50,8 +50,8 @@ class MailTemplate extends Template
     /* CONST for template choices         */
     /**************************************/
 
-    const MODEL1 = 'model1';
-    const MODEL2 = 'model2';
+    const MODEL1 = '01-model1';
+    const MODEL2 = '02-model2';
 
     public static function getTemplateChoices(): array
     {

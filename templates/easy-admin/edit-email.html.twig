@@ -1,0 +1,21 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+
+{% block page_title %}
+    Edit and {{ action }} email
+{% endblock %}
+
+{% block page_actions %}
+    <a href="{{ ea_url().setAction('detail') }}" class="btn btn-secondary">Back to list</a>
+{% endblock %}
+
+{% block main %}
+    {{ form_start(form) }}
+        {{ form_rest(form) }}
+        <button type="submit" class="btn btn-primary">
+            <span class="fa fa-paper-plane"></span>
+            {{ action }} email
+        </button>
+    {{ form_end(form) }}
+
+{% endblock %}

@@ -4,6 +4,7 @@ namespace Kikwik\MailManagerBundle\EasyAdmin;
 
 use App\Entity\Mail\MailDecorator;
 use App\Repository\Mail\MailDecoratorRepository;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
@@ -12,6 +13,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 trait KikwikMailTemplateCrudControllerTrait
 {
+    public function configureCrud(Crud $crud): Crud
+    {
+        return parent::configureCrud($crud)
+            ->setDefaultSort([
+                'name' => 'ASC',
+            ]);
+    }
+
     public function getDefaultFieldList(array $templateChoices): array
     {
         $decoratorChoices = [];

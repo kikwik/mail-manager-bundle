@@ -54,6 +54,7 @@ class MailBuilder
         return $this;
     }
 
+    // TODO: This violates the single responsibility principle, and should be moved to a MailSender service.
     public function sendEmail(): self
     {
         $eamil = $this->buildEmailAndLog();
@@ -62,6 +63,7 @@ class MailBuilder
         return $this;
     }
 
+    // TODO: this violates the single responsibility principle, and should be eliminated
     public function persistLog(): self
     {
         $this->buildEmailAndLog();
