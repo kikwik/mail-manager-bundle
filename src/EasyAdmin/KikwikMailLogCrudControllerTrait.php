@@ -20,6 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
 trait KikwikMailLogCrudControllerTrait
@@ -135,6 +136,10 @@ trait KikwikMailLogCrudControllerTrait
     {
         // Create a form to edit the TemplatedEmail subject fields
         $form = $this->createFormBuilder()
+            ->add('recipientAddress', TextType::class, [
+                'data' => $email->getTo()[0]->getAddress(),
+                'label' => 'Recipient address',
+            ])
             ->add('subject', TextType::class, [
                 'data' => $email->getSubject(),
                 'label' => 'Subject',
@@ -156,6 +161,7 @@ trait KikwikMailLogCrudControllerTrait
         // Update the TemplatedEmail object with the form data
         $data = $form->getData();
         $email
+            ->to($data['recipientAddress'])
             ->subject($data['subject'])
             ->html($data['body'])
         ;

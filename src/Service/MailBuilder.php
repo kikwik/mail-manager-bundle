@@ -16,6 +16,7 @@ use Twig\Environment;
 class MailBuilder
 {
     private array $context = [];
+    private array $recipients = [];
     private array $carbonCopies = [];
     private array $blindCarbonCopies = [];
 
@@ -23,7 +24,6 @@ class MailBuilder
         private Template $template,
         private ?Decorator $decorator,
         private Log $log,
-        private Address $recipient,
         private readonly Environment $twig,
         private readonly MailerInterface $mailer,
         private readonly EntityManagerInterface $entityManager,
@@ -38,6 +38,12 @@ class MailBuilder
     public function context(array $context): self
     {
         $this->context = $context;
+        return $this;
+    }
+
+    public function to(array $to): self
+    {
+        $this->recipients = array_map(fn($item) => $item instanceof Address ? $item : new Address($item), $to);
         return $this;
     }
 
@@ -57,9 +63,11 @@ class MailBuilder
     // TODO: This violates the single responsibility principle, and should be moved to a MailSender service.
     public function sendEmail(): self
     {
-        $eamil = $this->buildEmailAndLog();
-        $this->log->setSendedAt(new \DateTimeImmutable());
-        $this->mailer->send($eamil);
+        $email = $this->buildEmailAndLog();
+        if($email->getTo() || $email->getCc() || $email->getBcc()) {
+            $this->log->setSendedAt(new \DateTimeImmutable());
+            $this->mailer->send($email);
+        }
         return $this;
     }
 
@@ -106,14 +114,15 @@ class MailBuilder
         $renderedBody = $bodyTemplate->render($this->context);
 
         // compose the email
-        $email = (new TemplatedEmail())
-            ->from($this->template->getSender())
-            ->to($this->recipient)
-            ->subject($renderedSubject)
-            ->html($renderedBody);
+        $email = new TemplatedEmail();
+        $email->from($this->template->getSender());
         if($this->template->getReplyToEmail())
         {
             $email->replyTo($this->template->getReplyToEmail());
+        }
+        foreach($this->recipients as $recipient)
+        {
+            $email->addTo($recipient);
         }
         foreach($this->carbonCopies as $carbonCopy)
         {
@@ -123,6 +132,9 @@ class MailBuilder
         {
             $email->addBcc($blindCarbonCopy);
         }
+        $email->subject($renderedSubject);
+        $email->html($renderedBody);
+
         $this->log->fromEmail($email);
 
         return $email;

@@ -31,7 +31,7 @@ class MailBuilderFactory
         }
     }
 
-    public function createMailBuilder(string $templateName, Address $recipient): ?MailBuilder
+    public function createMailBuilder(string $templateName): ?MailBuilder
     {
         // find template
         $template = $this->entityManager->getRepository($this->templateClass)->findOneBy(['name' => $templateName]);
@@ -62,7 +62,7 @@ class MailBuilderFactory
 
                 // create builder
                 return new MailBuilder(
-                    $template, $decorator, $log, $recipient,
+                    $template, $decorator, $log,
                     $this->twig, $this->mailer, $this->entityManager
                 );
             }
