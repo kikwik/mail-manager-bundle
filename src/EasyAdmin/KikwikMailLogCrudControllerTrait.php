@@ -20,7 +20,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
 trait KikwikMailLogCrudControllerTrait
@@ -91,7 +90,7 @@ trait KikwikMailLogCrudControllerTrait
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->setEntityId($log->getId())->generateUrl());
         }
 
-        return $this->render('@KikwikMailManager/easy-admin/edit-email.html.twig', [
+        return $this->render('@KikwikMailManager/easy-admin/send-forward-email-action.html.twig', [
             'log' => $log,
             'form' => $form->createView(),
             'action' => 'send'
@@ -125,7 +124,7 @@ trait KikwikMailLogCrudControllerTrait
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->setEntityId($newLog->getId())->generateUrl());
         }
 
-        return $this->render('@KikwikMailManager/easy-admin/edit-email.html.twig', [
+        return $this->render('@KikwikMailManager/easy-admin/send-forward-email-action.html.twig', [
             'log' => $newLog,
             'form' => $form->createView(),
             'action' => 'forward'

@@ -7,7 +7,13 @@
 
 {% if emailObject %}
     {% if ea.crud.currentAction == 'detail' %}
-        {{ emailObject.htmlBody | raw }}
+        <iframe
+            data-iframe-resizer-target="iframe"
+            width="100%"
+            height="600px"
+            style="border: 1px solid silver;"
+            srcdoc="{{ emailObject.htmlBody|e('html_attr') }}">
+        </iframe>
     {% else %}
         {% set html_id = 'ea-text-editor-' ~ field.uniqueId %}
         <a href="#" data-bs-toggle="modal" data-bs-target="#{{ html_id }}">
@@ -30,7 +36,13 @@
                         <div><span style="width: 70px;display: inline-block;">Cc:</span> {% for cc in emailObject.getCc %}<span class="badge badge-info">{{ cc.toString }}</span>{% endfor %}</div>
                         <div><span style="width: 70px;display: inline-block;">Bcc:</span> {% for bcc in emailObject.getBcc %}<span class="badge badge-info">{{ bcc.toString }}</span>{% endfor %}</div>
                         <hr/>
-                        {{ emailObject.htmlBody | raw }}
+                        <iframe
+                            data-iframe-resizer-target="iframe"
+                            width="100%"
+                            height="600px"
+                            style="border: 1px solid silver;"
+                            srcdoc="{{ emailObject.htmlBody|e('html_attr') }}">
+                        </iframe>
                     </div>
                 </div>
             </div>
