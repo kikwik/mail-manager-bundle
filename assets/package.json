@@ -1,0 +1,21 @@
+{
+    "name": "@kikwik/mail-manager-bundle",
+    "description": "Mail manager",
+    "license": "MIT",
+    "version": "1.0.0",
+    "symfony": {
+        "controllers": {
+            "iframe-resizer": {
+                "main": "controllers/iframe-resizer.js",
+                "fetch": "eager",
+                "enabled": true
+            }
+        },
+        "importmap": {
+            "@hotwired/stimulus": "^3.0.0"
+        }
+    },
+    "peerDependencies": {
+        "@hotwired/stimulus": "^3.0.0"
+    }
+}

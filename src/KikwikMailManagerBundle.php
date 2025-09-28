@@ -6,6 +6,7 @@ use Doctrine\Bundle\DoctrineBundle\DependencyInjection\Compiler\DoctrineOrmMappi
 use Kikwik\MailManagerBundle\Model\Decorator;
 use Kikwik\MailManagerBundle\Model\Log;
 use Kikwik\MailManagerBundle\Model\Template;
+use Symfony\Component\AssetMapper\AssetMapperInterface;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -68,5 +69,33 @@ final class KikwikMailManagerBundle extends AbstractBundle
         ));
     }
 
+    public function prependExtension(ContainerConfigurator $configurator, ContainerBuilder $container): void
+    {
+        if (!$this->isAssetMapperAvailable($container)) {
+            return;
+        }
 
+        $container->prependExtensionConfig('framework', [
+            'asset_mapper' => [
+                'paths' => [
+                    __DIR__ . '/../assets' => '@kikwik/mail-manager-bundle',
+                ],
+            ],
+        ]);
+    }
+
+    private function isAssetMapperAvailable(ContainerBuilder $container): bool
+    {
+        if (!interface_exists(AssetMapperInterface::class)) {
+            return false;
+        }
+
+        // check that FrameworkBundle 6.3 or higher is installed
+        $bundlesMetadata = $container->getParameter('kernel.bundles_metadata');
+        if (!isset($bundlesMetadata['FrameworkBundle'])) {
+            return false;
+        }
+
+        return is_file($bundlesMetadata['FrameworkBundle']['path'] . '/Resources/config/asset_mapper.php');
+    }
 }

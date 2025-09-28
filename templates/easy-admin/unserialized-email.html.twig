@@ -8,9 +8,8 @@
 {% if emailObject %}
     {% if ea.crud.currentAction == 'detail' %}
         <iframe
-            data-iframe-resizer-target="iframe"
+            {{ stimulus_controller('@kikwik/mail-manager-bundle/iframe-resizer') }}
             width="100%"
-            height="600px"
             style="border: 1px solid silver;"
             srcdoc="{{ emailObject.htmlBody|e('html_attr') }}">
         </iframe>
@@ -37,9 +36,8 @@
                         <div><span style="width: 70px;display: inline-block;">Bcc:</span> {% for bcc in emailObject.getBcc %}<span class="badge badge-info">{{ bcc.toString }}</span>{% endfor %}</div>
                         <hr/>
                         <iframe
-                            data-iframe-resizer-target="iframe"
+                            {{ stimulus_controller('@kikwik/mail-manager-bundle/iframe-resizer') }}
                             width="100%"
-                            height="600px"
                             style="border: 1px solid silver;"
                             srcdoc="{{ emailObject.htmlBody|e('html_attr') }}">
                         </iframe>

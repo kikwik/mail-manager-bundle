@@ -3,6 +3,9 @@
     "description": "Transactional email manager for symfony 6.4 / 7.*",
     "type": "symfony-bundle",
     "license": "MIT",
+    "keywords": [
+        "symfony-ux"
+    ],
     "authors": [
         {
             "name": "Davide Scarpato",
