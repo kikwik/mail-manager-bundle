@@ -2,9 +2,9 @@
 
 namespace Kikwik\MailManagerBundle\EasyAdmin;
 
-use EasyCorp\Bundle\EasyAdminBundle\Field\CodeEditorField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Ehyiah\QuillJsBundle\DTO\QuillGroup;
+use Ehyiah\QuillJsBundle\Form\QuillAdminField;
 
 trait KikwikMailDecoratorCrudControllerTrait
 {
@@ -12,10 +12,22 @@ trait KikwikMailDecoratorCrudControllerTrait
     {
         return [
             TextField::new('name'),
-            CodeEditorField::new('header')
-                ->setTemplatePath('@KikwikMailManager/easy-admin/field/code_editor_with_preview.html.twig'),
-            CodeEditorField::new('footer')
-                ->setTemplatePath('@KikwikMailManager/easy-admin/field/code_editor_with_preview.html.twig'),
+            QuillAdminField::new('header')->setFormTypeOptions([
+                'quill_extra_options' => [
+                    'height' => '300px',
+                ],
+                'quill_options' => [
+                    QuillGroup::buildWithAllFields()
+                ]
+            ]),
+            QuillAdminField::new('footer')->setFormTypeOptions([
+                'quill_extra_options' => [
+                    'height' => '300px',
+                ],
+                'quill_options' => [
+                    QuillGroup::buildWithAllFields()
+                ]
+            ]),
         ];
     }
 }

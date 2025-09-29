@@ -10,6 +10,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CodeEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Ehyiah\QuillJsBundle\DTO\QuillGroup;
+use Ehyiah\QuillJsBundle\Form\QuillAdminField;
 
 trait KikwikMailTemplateCrudControllerTrait
 {
@@ -38,7 +40,14 @@ trait KikwikMailTemplateCrudControllerTrait
             TextField::new('replyToEmail'),
             TextField::new('subject'),
             ChoiceField::new('decoratorName')->setChoices($decoratorChoices),
-            CodeEditorField::new('content')->setTemplatePath('@KikwikMailManager/easy-admin/field/code_editor_with_preview.html.twig'),
+            QuillAdminField::new('content')->setFormTypeOptions([
+                'quill_extra_options' => [
+                    'height' => '780px',
+                ],
+                'quill_options' => [
+                    QuillGroup::buildWithAllFields()
+                ]
+            ]),
         ];
     }
 

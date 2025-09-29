@@ -15,6 +15,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Form\Type\CodeEditorType;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Ehyiah\QuillJsBundle\DTO\QuillGroup;
+use Ehyiah\QuillJsBundle\Form\QuillType;
 use Kikwik\MailManagerBundle\Model\Log;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -25,6 +27,14 @@ use Symfony\Component\Mime\Email;
 
 trait KikwikMailLogCrudControllerTrait
 {
+    public function configureCrud(Crud $crud): Crud
+    {
+        return parent::configureCrud($crud)
+            ->setDefaultSort([
+                'createdAt' => 'DESC',
+            ]);
+    }
+
     public function configureActions(Actions $actions): Actions
     {
         return parent::configureActions($actions)
@@ -91,7 +101,7 @@ trait KikwikMailLogCrudControllerTrait
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->setEntityId($log->getId())->generateUrl());
         }
 
-        return $this->render('@KikwikMailManager/easy-admin/send-forward-email-action.html.twig', [
+        return $this->render('@KikwikMailManager/easy-admin/action_send-forward-email.html.twig', [
             'log' => $log,
             'form' => $form->createView(),
             'action' => 'send'
@@ -125,7 +135,7 @@ trait KikwikMailLogCrudControllerTrait
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->setEntityId($newLog->getId())->generateUrl());
         }
 
-        return $this->render('@KikwikMailManager/easy-admin/send-forward-email-action.html.twig', [
+        return $this->render('@KikwikMailManager/easy-admin/action_send-forward-email.html.twig', [
             'log' => $newLog,
             'form' => $form->createView(),
             'action' => 'forward'
@@ -144,11 +154,14 @@ trait KikwikMailLogCrudControllerTrait
                 'data' => $email->getSubject(),
                 'label' => 'Subject',
             ])
-            ->add('body', CodeEditorType::class, [
+            ->add('body', QuillType::class, [
                 'data' => $email->getHtmlBody(),
                 'label' => 'Content',
-                'attr' => [
-                    'rows' => 20,
+                'quill_extra_options' => [
+                    'height' => '780px',
+                ],
+                'quill_options' => [
+                    QuillGroup::buildWithAllFields()
                 ],
             ])
             ->getForm();
@@ -191,7 +204,8 @@ trait KikwikMailLogCrudControllerTrait
             TextField::new('templateName')->hideOnForm(),
             TextField::new('subject')->hideOnForm(),
             Field::new('unserializedEmail', 'Body')->hideOnForm()
-                ->setTemplatePath('@KikwikMailManager/easy-admin/field/unserialized-email.html.twig'),
+                ->setTemplatePath('@KikwikMailManager/easy-admin/field_unserialized-email.html.twig'),
+            DateTimeField::new('createdAt')->hideOnForm(),
             DateTimeField::new('sendedAt')->hideOnForm(),
         ];
     }
