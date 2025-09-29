@@ -34,6 +34,7 @@
                         <div><span style="width: 70px;display: inline-block;">To:</span> {% for to in emailObject.getTo %}<span class="badge badge-info">{{ to.toString }}</span>{% endfor %}</div>
                         <div><span style="width: 70px;display: inline-block;">Cc:</span> {% for cc in emailObject.getCc %}<span class="badge badge-info">{{ cc.toString }}</span>{% endfor %}</div>
                         <div><span style="width: 70px;display: inline-block;">Bcc:</span> {% for bcc in emailObject.getBcc %}<span class="badge badge-info">{{ bcc.toString }}</span>{% endfor %}</div>
+                        <div><span style="width: 70px;display: inline-block;">Sended at:</span> {% if entity.instance.sendedAt %}{{ entity.instance.sendedAt | format_datetime('long','long') }}{% else %}<span class="badge badge-warning">Unsended</span>{% endif %}</div>
                         <hr/>
                         <iframe
                             {{ stimulus_controller('@kikwik/mail-manager-bundle/iframe-resizer') }}

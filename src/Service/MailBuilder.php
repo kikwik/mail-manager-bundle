@@ -60,12 +60,31 @@ class MailBuilder
         return $this;
     }
 
+    public function readyToSend(): self
+    {
+        $this->log->setStatus(Log::STATUS_READY_TO_SEND);
+        return $this;
+    }
+
+    public function needReview(): self
+    {
+        $this->log->setStatus(Log::STATUS_NEED_MANUAL_REVIEW);
+        return $this;
+    }
+
+    public function doNotSend(): self
+    {
+        $this->log->setStatus(Log::STATUS_DO_NOT_SEND);
+        return $this;
+    }
+
     // TODO: This violates the single responsibility principle, and should be moved to a MailSender service.
     public function sendEmail(): self
     {
         $email = $this->buildEmailAndLog();
         if($email->getTo() || $email->getCc() || $email->getBcc()) {
             $this->log->setSendedAt(new \DateTimeImmutable());
+            $this->log->setStatus(LOG::STATUS_SENT);
             $this->mailer->send($email);
         }
         return $this;

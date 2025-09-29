@@ -8,6 +8,15 @@ use Symfony\Component\Mime\Email;
 abstract class Log
 {
     /**************************************/
+    /* CONST                              */
+    /**************************************/
+
+    public const STATUS_READY_TO_SEND = 'READY_TO_SEND';
+    public const STATUS_NEED_MANUAL_REVIEW = 'NEED_MANUAL_REVIEW';
+    public const STATUS_DO_NOT_SEND = 'DO_NOT_SEND';
+    public const STATUS_SENT = 'SENT';
+
+    /**************************************/
     /* PROPERTIES                         */
     /**************************************/
 
@@ -27,7 +36,10 @@ abstract class Log
 
     protected ?string $serializedEmail = null;
 
+    protected ?string $status = self::STATUS_READY_TO_SEND;
+
     protected ?\DateTimeImmutable $sendedAt = null;
+
 
     /**************************************/
     /* CUSTOM METHODS                     */
@@ -158,6 +170,17 @@ abstract class Log
     public function setSendedAt(?\DateTimeImmutable $sendedAt): static
     {
         $this->sendedAt = $sendedAt;
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): static
+    {
+        $this->status = $status;
         return $this;
     }
 }

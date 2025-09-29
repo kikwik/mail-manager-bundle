@@ -12,6 +12,7 @@
         <field name="templateName" type="string" nullable="true" />
         <field name="subject" type="string" />
         <field name="serializedEmail" type="text" />
+        <field name="status" type="string" />
         <field name="sendedAt" type="datetime_immutable" nullable="true" />
     </mapped-superclass>
 </doctrine-mapping>

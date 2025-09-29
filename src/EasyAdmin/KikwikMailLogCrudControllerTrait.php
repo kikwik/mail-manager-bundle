@@ -17,6 +17,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Ehyiah\QuillJsBundle\DTO\QuillGroup;
 use Ehyiah\QuillJsBundle\Form\QuillType;
 use Kikwik\MailManagerBundle\Model\Log;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -82,20 +83,29 @@ trait KikwikMailLogCrudControllerTrait
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->generateUrl());
         }
 
-        $form = $this->createSendForwardForm($log->getUnserializedEmail());
+        $form = $this->createSendForwardForm($log->getUnserializedEmail(), 'send');
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid())
         {
             $this->updateLog($log, $form);
 
-            // send email
-            $mail = unserialize($log->getSerializedEmail());
-            $mailer->send($mail);
-            $log->setSendedAt(new \DateTimeImmutable());
+            if($form->get('skip')->isClicked())
+            {
+                // skip email TODO: move this logic to a service
+                $log->setStatus(Log::STATUS_DO_NOT_SEND);
+                $this->addFlash('success', 'This email has just been skipped');
+            }
+            else
+            {
+                // send email TODO: move this logic to a service
+                $mailer->send($log->getUnserializedEmail());
+                $log->setSendedAt(new \DateTimeImmutable());
+                $log->setStatus(Log::STATUS_SENT);
+                $this->addFlash('success', 'This email has just been sended');
+            }
             $entityManager->persist($log);
             $entityManager->flush();
 
-            $this->addFlash('success', 'This email has just been sended');
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->setEntityId($log->getId())->generateUrl());
         }
 
@@ -117,19 +127,20 @@ trait KikwikMailLogCrudControllerTrait
         $this->cloneLogCustomFields($oldLog, $newLog);
         $newLog->setSendedAt(null);
 
-        $form = $this->createSendForwardForm($newLog->getUnserializedEmail());
+        $form = $this->createSendForwardForm($newLog->getUnserializedEmail(), 'forward');
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid())
         {
             $this->updateLog($newLog, $form);
 
-            // send email
+            // send email TODO: move this logic to a service
             $mailer->send($newLog->getUnserializedEmail());
             $newLog->setSendedAt(new \DateTimeImmutable());
+            $newLog->setStatus(Log::STATUS_SENT);
+            $this->addFlash('success', 'This email has just been sended');
             $entityManager->persist($newLog);
             $entityManager->flush();
 
-            $this->addFlash('success', 'This email has just been sended');
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->setEntityId($newLog->getId())->generateUrl());
         }
 
@@ -140,10 +151,10 @@ trait KikwikMailLogCrudControllerTrait
         ]);
     }
 
-    protected function createSendForwardForm(Email $email): FormInterface
+    protected function createSendForwardForm(Email $email, string $action): FormInterface  // TODO: move to a form type
     {
         // Create a form to edit the TemplatedEmail subject fields
-        $form = $this->createFormBuilder()
+        $formBuilder = $this->createFormBuilder(null,[ 'attr' => ['novalidate' => 'novalidate']])
             ->add('recipientAddress', TextType::class, [
                 'data' => $email->getTo()[0]->getAddress(),
                 'label' => 'Recipient address',
@@ -162,8 +173,15 @@ trait KikwikMailLogCrudControllerTrait
                     QuillGroup::buildWithAllFields()
                 ],
             ])
-            ->getForm();
-        return $form;
+            ->add('send', SubmitType::class, ['label'=>'<span class="fa fa-paper-plane"></span>&nbsp;&nbsp;Send email', 'label_html' => true, 'attr' => ['class' => 'btn btn-primary']])
+        ;
+        if($action === 'send')
+        {
+            $formBuilder
+                ->add('skip', SubmitType::class, ['label'=>'<span class="fa fa-trash"></span>&nbsp;&nbsp;Do not send email, mark as Skipped', 'label_html' => true, 'attr' => ['class' => 'btn btn-default']])
+            ;
+        }
+        return $formBuilder->getForm();
     }
 
     protected function updateLog(Log $log, FormInterface $form): void
@@ -204,6 +222,7 @@ trait KikwikMailLogCrudControllerTrait
             Field::new('unserializedEmail', 'Body')->hideOnForm()
                 ->setTemplatePath('@KikwikMailManager/easy-admin/field_unserialized-email.html.twig'),
             DateTimeField::new('createdAt')->hideOnForm(),
+            TextField::new('status')->hideOnForm(),
             DateTimeField::new('sendedAt')->hideOnForm(),
         ];
     }
