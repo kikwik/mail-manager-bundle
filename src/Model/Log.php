@@ -57,36 +57,6 @@ abstract class Log
         return unserialize($this->serializedEmail);
     }
 
-    public function getEmailSubject(): string
-    {
-        return $this->getUnserializedEmail()->getSubject();
-
-    }
-
-    public function setEmailSubject(string $value): static
-    {
-        $email = $this->getUnserializedEmail();
-        $email->subject($value);
-        $this->setSerializedEmail(serialize($email));
-
-        return $this;
-    }
-
-    public function getEmailBody(): string
-    {
-        return $this->getUnserializedEmail()->getHtmlBody();
-
-    }
-
-    public function setEmailBody(string $value): static
-    {
-        $email = $this->getUnserializedEmail();
-        $email->html($value);
-        $this->setSerializedEmail(serialize($email));
-
-        return $this;
-    }
-
     /**************************************/
     /* GETTERS & SETTERS                  */
     /**************************************/

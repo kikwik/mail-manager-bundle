@@ -201,11 +201,12 @@ final class MyController extends AbstractController
     {
         // Example 1 - create, send and persist
         // create the MailBuilder object (it will be null if the template does not exists or is not enabled)
-        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name', new Address('sales@customer.com','My customer')))
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))
         {
             $mailBuilder->getLog()->setSomethingCustom($myObject); // set a custom property defined in your App\Entity\Mail\MailLog entity
             $mailBuilder
                 ->context(['attivazione'=>$richiesta])                      // set context
+                ->to([new Address('sales@customer.com','My customer')])     // set to
                 ->cc(['info@customer.com'])                                 // set cc
                 ->bcc(['admin@mycompany.com', 'helpdesk@mycompany.com'])    // set bcc
                 ->sendEmail()                                               // send the email (Log::sendedAt will be filled with the current datetime)
@@ -214,19 +215,21 @@ final class MyController extends AbstractController
         }
         
         // Example 2 - persist the log without send email
-        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name', new Address('sales@customer.com','My customer')))
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))
         {
             $mailBuilder
                 ->context(['attivazione'=>$richiesta])
+                ->to([new Address('sales@customer.com','My customer')])
                 ->persistLog()
             ;
         }
 
         // Example 3 - send email without persist the log
-        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name', new Address('sales@customer.com','My customer')))
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))
         {
             $mailBuilder
                 ->context(['attivazione'=>$richiesta])
+                ->to([new Address('sales@customer.com','My customer')])
                 ->sendEmail()
             ;
         }
@@ -328,6 +331,11 @@ class MailTemplateCrudController extends AbstractCrudController
     public function configureFilters(Filters $filters): Filters
     {
         return $this->addDefaultFilters($filters, MailTemplate::getTemplateChoices());
+    }
+    
+    protected function cloneLogCustomFields(Log $oldLog, Log $newLog): void
+    {
+        $newLog->setSomethingCustom($oldLog->getSomethingCustom()); // set a custom property when cloning the log for forward action
     }
 }
 ```
