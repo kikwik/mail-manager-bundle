@@ -12,8 +12,10 @@ trait KikwikMailDecoratorCrudControllerTrait
     {
         return [
             TextField::new('name'),
-            CodeEditorField::new('header')->setTemplatePath('@KikwikMailManager/easy-admin/code_editor_with_preview.html.twig'),
-            CodeEditorField::new('footer')->setTemplatePath('@KikwikMailManager/easy-admin/code_editor_with_preview.html.twig'),
+            CodeEditorField::new('header')
+                ->setTemplatePath('@KikwikMailManager/easy-admin/field/code_editor_with_preview.html.twig'),
+            CodeEditorField::new('footer')
+                ->setTemplatePath('@KikwikMailManager/easy-admin/field/code_editor_with_preview.html.twig'),
         ];
     }
 }

@@ -13,6 +13,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Form\Type\CodeEditorType;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Kikwik\MailManagerBundle\Model\Log;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -143,7 +144,7 @@ trait KikwikMailLogCrudControllerTrait
                 'data' => $email->getSubject(),
                 'label' => 'Subject',
             ])
-            ->add('body', TextareaType::class, [
+            ->add('body', CodeEditorType::class, [
                 'data' => $email->getHtmlBody(),
                 'label' => 'Content',
                 'attr' => [
@@ -190,7 +191,7 @@ trait KikwikMailLogCrudControllerTrait
             TextField::new('templateName')->hideOnForm(),
             TextField::new('subject')->hideOnForm(),
             Field::new('unserializedEmail', 'Body')->hideOnForm()
-                ->setTemplatePath('@KikwikMailManager/easy-admin/unserialized-email.html.twig'),
+                ->setTemplatePath('@KikwikMailManager/easy-admin/field/unserialized-email.html.twig'),
             DateTimeField::new('sendedAt')->hideOnForm(),
         ];
     }

@@ -38,7 +38,7 @@ trait KikwikMailTemplateCrudControllerTrait
             TextField::new('replyToEmail'),
             TextField::new('subject'),
             ChoiceField::new('decoratorName')->setChoices($decoratorChoices),
-            CodeEditorField::new('content')->setTemplatePath('@KikwikMailManager/easy-admin/code_editor_with_preview.html.twig'),
+            CodeEditorField::new('content')->setTemplatePath('@KikwikMailManager/easy-admin/field/code_editor_with_preview.html.twig'),
         ];
     }
 
