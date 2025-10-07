@@ -2,23 +2,20 @@
 
 namespace Kikwik\MailManagerBundle\Service;
 
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Kikwik\MailManagerBundle\Model\Decorator;
 use Kikwik\MailManagerBundle\Model\Log;
 use Kikwik\MailManagerBundle\Model\Template;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
 use Twig\Environment;
 
 class MailBuilderFactory
 {
     public function __construct(
-        private ?string $templateClass,
-        private ?string $decoratorClass,
-        private ?string $logClass,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly Environment $twig,
-        private readonly MailerInterface $mailer,
+        private ?string                  $templateClass,
+        private ?string                  $decoratorClass,
+        private ?string                  $logClass,
+        private readonly ManagerRegistry $doctrine,
+        private readonly Environment     $twig,
     )
     {
         if(!$this->templateClass){
@@ -34,24 +31,21 @@ class MailBuilderFactory
     public function createMailBuilder(string $templateName): ?MailBuilder
     {
         // find template
-        $template = $this->entityManager->getRepository($this->templateClass)->findOneBy(['name' => $templateName]);
+        $template = $this->doctrine->getRepository($this->templateClass)->findOneBy(['name' => $templateName]);
         if($template)
         {
             assert($template instanceof Template);
             if($template->isEnabled())
             {
                 // eventually find decorator
+                $decorator = null;
                 if($this->decoratorClass && $template->getDecoratorName())
                 {
-                    $decorator = $this->entityManager->getRepository($this->decoratorClass)->findOneBy(['name' => $template->getDecoratorName()]);
+                    $decorator = $this->doctrine->getRepository($this->decoratorClass)->findOneBy(['name' => $template->getDecoratorName()]);
                     if($decorator)
                     {
                         assert($decorator instanceof Decorator);
                     }
-                }
-                else
-                {
-                    $decorator = null;
                 }
 
                 // create Log and set template
@@ -62,8 +56,10 @@ class MailBuilderFactory
 
                 // create builder
                 return new MailBuilder(
-                    $template, $decorator, $log,
-                    $this->twig, $this->mailer, $this->entityManager
+                    $template,
+                    $decorator,
+                    $log,
+                    $this->twig,
                 );
             }
         }

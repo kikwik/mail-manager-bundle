@@ -192,46 +192,74 @@ Usage
 -----
 
 Autowire the `Kikwik\MailManagerBundle\Service\MailBuilderFactory` service and call the `createMailBuilder` method,
-then use the returned `Kikwik\MailManagerBundle\Service\MailBuilder` object to compose and send emails:
+then use the returned `Kikwik\MailManagerBundle\Service\MailBuilder` object to compose emails.
+Autowire the `Kikwik\MailManagerBundle\Service\MailManager` service to send emails.
 
 ```php
+
+use \Kikwik\MailManagerBundle\Service\MailBuilderFactory;
+use \Kikwik\MailManagerBundle\Service\MailSender;
+
 final class MyController extends AbstractController
 {
-    public function myAction(MailBuilderFactory $mailBuilderFactory)
+    public function myAction(MailBuilderFactory $mailBuilderFactory, MailSender $mailSender)
     {
-        // Example 1 - create, send and persist
-        // create the MailBuilder object (it will be null if the template does not exists or is not enabled)
-        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))
+        // Example 1 - create, send and persist       
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))   // MailBuilderFactory will be null if the template does not exists or is not enabled
         {
-            $mailBuilder->getLog()->setSomethingCustom($myObject); // set a custom property defined in your App\Entity\Mail\MailLog entity
-            $mailBuilder
+            // create the Log object
+            $mailLog = $mailBuilder
                 ->context(['attivazione'=>$richiesta])                      // set context
                 ->to([new Address('sales@customer.com','My customer')])     // set to
                 ->cc(['info@customer.com'])                                 // set cc
                 ->bcc(['admin@mycompany.com', 'helpdesk@mycompany.com'])    // set bcc
-                ->sendEmail()                                               // send the email (Log::sendedAt will be filled with the current datetime)
-                ->persistLog()                                              // save App\Entity\Mail\MailLog in the database (a flush is called)
+                ->getLog()
+            ;
+            $mailLog->setSomethingCustom($myObject); // set a custom property defined in your App\Entity\Mail\MailLog entity
+                
+            $mailSender
+                ->send($mailLog)         // send the email, persist the $mailLog and flush
             ;
         }
         
-        // Example 2 - persist the log without send email
+        // Example 2 - persist the log without send email for later review
         if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))
         {
-            $mailBuilder
+            // create the Log object
+            $mailLog = $mailBuilder
                 ->context(['attivazione'=>$richiesta])
                 ->to([new Address('sales@customer.com','My customer')])
-                ->persistLog()
+                ->getLog()
+            ;
+            $mailSender
+                ->needManualReview($mailLog)    // save the Log object in the database and mark it as "need manual review"
             ;
         }
 
-        // Example 3 - send email without persist the log
+        // Example 3 - persist the log without send email for archive
         if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))
         {
-            $mailBuilder
+            // create the Log object
+            $mailLog = $mailBuilder
                 ->context(['attivazione'=>$richiesta])
                 ->to([new Address('sales@customer.com','My customer')])
-                ->sendEmail()
+                ->getLog()
             ;
+            $mailSender
+                ->doNotSend($mailLog)    // save the Log object in the database and mark it as "do not send"
+            ;
+        }
+        
+        // Example 4 - send email without persist the log
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))
+        {
+            // create the Log object
+            $mailLog = $mailBuilder
+                ->context(['attivazione'=>$richiesta])
+                ->to([new Address('sales@customer.com','My customer')])
+                ->getLog()
+            ;
+            $mailSender->send($mailLog, false); // send the email without saving the Log object in the database
         }
     }
 }

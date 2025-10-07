@@ -4,6 +4,7 @@ namespace Kikwik\MailManagerBundle\Service;
 
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Kikwik\MailManagerBundle\Model\Decorator;
 use Kikwik\MailManagerBundle\Model\Log;
 use Kikwik\MailManagerBundle\Model\Template;
@@ -21,12 +22,10 @@ class MailBuilder
     private array $blindCarbonCopies = [];
 
     public function __construct(
-        private Template $template,
-        private ?Decorator $decorator,
-        private Log $log,
-        private readonly Environment $twig,
-        private readonly MailerInterface $mailer,
-        private readonly EntityManagerInterface $entityManager,
+        private Template                 $template,
+        private ?Decorator               $decorator,
+        private Log                      $log,
+        private readonly Environment     $twig,
     )
     {
     }
@@ -60,58 +59,11 @@ class MailBuilder
         return $this;
     }
 
-    public function readyToSend(): self
-    {
-        $this->log->setStatus(Log::STATUS_READY_TO_SEND);
-        return $this;
-    }
-
-    public function needReview(): self
-    {
-        $this->log->setStatus(Log::STATUS_NEED_MANUAL_REVIEW);
-        return $this;
-    }
-
-    public function doNotSend(): self
-    {
-        $this->log->setStatus(Log::STATUS_DO_NOT_SEND);
-        return $this;
-    }
-
-    // TODO: This violates the single responsibility principle, and should be moved to a MailSender service.
-    public function sendEmail(): self
-    {
-        $email = $this->buildEmailAndLog();
-        if($email->getTo() || $email->getCc() || $email->getBcc()) {
-            $this->log->setSendedAt(new \DateTimeImmutable());
-            $this->log->setStatus(LOG::STATUS_SENT);
-            $this->mailer->send($email);
-        }
-        return $this;
-    }
-
-    // TODO: this violates the single responsibility principle, and should be eliminated
-    public function persistLog(): self
-    {
-        $this->buildEmailAndLog();
-        $this->entityManager->persist($this->log);
-        $this->entityManager->flush();
-        return $this;
-    }
-
     /**************************************/
-    /* GETTERS                            */
+    /* BUILDER                            */
     /**************************************/
 
     public function getLog(): Log
-    {
-        return $this->log;
-    }
-
-    /**************************************/
-    /* PRIVATE METHODS                    */
-    /**************************************/
-    private function buildEmailAndLog(): TemplatedEmail
     {
         // render the subject
         $subjectTemplate = $this->twig->createTemplate($this->template->getSubject());
@@ -154,8 +106,9 @@ class MailBuilder
         $email->subject($renderedSubject);
         $email->html($renderedBody);
 
+        // saves the email in the log and update log properties
         $this->log->fromEmail($email);
 
-        return $email;
+        return $this->log;
     }
 }

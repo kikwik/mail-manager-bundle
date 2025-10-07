@@ -17,6 +17,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Ehyiah\QuillJsBundle\DTO\QuillGroup;
 use Ehyiah\QuillJsBundle\Form\QuillType;
 use Kikwik\MailManagerBundle\Model\Log;
+use Kikwik\MailManagerBundle\Service\MailSender;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
@@ -73,7 +74,7 @@ trait KikwikMailLogCrudControllerTrait
     }
 
     #[AdminAction(routePath: '/{entityId}/send', routeName: 'sendEmail', methods: ['GET', 'POST'])]
-    public function sendEmail(AdminContext $context, Request $request, AdminUrlGenerator $adminUrlGenerator, MailerInterface $mailer, EntityManagerInterface $entityManager)
+    public function sendEmail(AdminContext $context, Request $request, AdminUrlGenerator $adminUrlGenerator, MailSender $mailSender)
     {
         /** @var Log $log */
         $log = $context->getEntity()->getInstance();
@@ -91,20 +92,16 @@ trait KikwikMailLogCrudControllerTrait
 
             if($form->get('skip')->isClicked())
             {
-                // skip email TODO: move this logic to a service
-                $log->setStatus(Log::STATUS_DO_NOT_SEND);
+                // skip email
+                $mailSender->doNotSend($log);
                 $this->addFlash('success', 'This email has just been skipped');
             }
             else
             {
-                // send email TODO: move this logic to a service
-                $mailer->send($log->getUnserializedEmail());
-                $log->setSendedAt(new \DateTimeImmutable());
-                $log->setStatus(Log::STATUS_SENT);
+                // send email
+                $mailSender->send($log);
                 $this->addFlash('success', 'This email has just been sended');
             }
-            $entityManager->persist($log);
-            $entityManager->flush();
 
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->setEntityId($log->getId())->generateUrl());
         }
@@ -117,7 +114,7 @@ trait KikwikMailLogCrudControllerTrait
     }
 
     #[AdminAction(routePath: '/{entityId}/forward', routeName: 'forwardEmail', methods: ['GET', 'POST'])]
-    public function forwardEmail(AdminContext $context, Request $request, AdminUrlGenerator $adminUrlGenerator, MailerInterface $mailer, EntityManagerInterface $entityManager)
+    public function forwardEmail(AdminContext $context, Request $request, AdminUrlGenerator $adminUrlGenerator, MailSender $mailSender)
     {
         $oldLog = $context->getEntity()->getInstance();
         assert($oldLog instanceof Log);
@@ -133,13 +130,9 @@ trait KikwikMailLogCrudControllerTrait
         {
             $this->updateLog($newLog, $form);
 
-            // send email TODO: move this logic to a service
-            $mailer->send($newLog->getUnserializedEmail());
-            $newLog->setSendedAt(new \DateTimeImmutable());
-            $newLog->setStatus(Log::STATUS_SENT);
+            // send email
+            $mailSender->send($newLog);
             $this->addFlash('success', 'This email has just been sended');
-            $entityManager->persist($newLog);
-            $entityManager->flush();
 
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->setEntityId($newLog->getId())->generateUrl());
         }
