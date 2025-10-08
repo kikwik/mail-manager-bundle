@@ -18,12 +18,16 @@ use Ehyiah\QuillJsBundle\DTO\QuillGroup;
 use Ehyiah\QuillJsBundle\Form\QuillType;
 use Kikwik\MailManagerBundle\Model\Log;
 use Kikwik\MailManagerBundle\Service\MailSender;
+use Kikwik\MailManagerBundle\Validator\EmailList;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 trait KikwikMailLogCrudControllerTrait
 {
@@ -146,11 +150,39 @@ trait KikwikMailLogCrudControllerTrait
 
     protected function createSendForwardForm(Email $email, string $action): FormInterface  // TODO: move to a form type
     {
+        $toData = [];
+        foreach($email->getTo() as $to)
+        {
+            $toData[] = $to->getAddress();
+        }
+        $ccData = [];
+        foreach($email->getCc() as $cc)
+        {
+            $ccData[] = $cc->getAddress();
+        }
+        $bccData = [];
+        foreach($email->getBcc() as $bcc)
+        {
+            $bccData[] = $bcc->getAddress();
+        }
         // Create a form to edit the TemplatedEmail subject fields
         $formBuilder = $this->createFormBuilder(null,[ 'attr' => ['novalidate' => 'novalidate']])
-            ->add('recipientAddress', TextType::class, [
-                'data' => $email->getTo()[0]->getAddress(),
-                'label' => 'Recipient address',
+            ->add('to', EmailType::class, [
+                'data' => implode(', ', $toData),
+                'label' => 'To',
+                'constraints' => new EmailList(),
+            ])
+            ->add('cc', TextType::class, [
+                'data' => implode(', ', $ccData),
+                'label' => 'Cc',
+                'help' => 'Separate multiple emails with a comma (,)',
+                'constraints' => new EmailList(),
+            ])
+            ->add('bcc', TextType::class, [
+                'data' => implode(', ', $bccData),
+                'label' => 'Bcc',
+                'help' => 'Separate multiple emails with a comma (,)',
+                'constraints' => new EmailList(),
             ])
             ->add('subject', TextType::class, [
                 'data' => $email->getSubject(),
@@ -166,12 +198,24 @@ trait KikwikMailLogCrudControllerTrait
                     QuillGroup::buildWithAllFields()
                 ],
             ])
-            ->add('send', SubmitType::class, ['label'=>'<span class="fa fa-paper-plane"></span>&nbsp;&nbsp;Send email', 'label_html' => true, 'attr' => ['class' => 'btn btn-primary']])
+            ->add('send', SubmitType::class, [
+                'priority' => 100,
+                'label'=>'<span class="fa fa-paper-plane"></span>&nbsp;&nbsp;Send email',
+                'label_html' => true,
+                'attr' => ['class' => 'btn btn-primary'],
+                'row_attr' => ['class' => 'text-end']
+            ])
         ;
         if($action === 'send')
         {
             $formBuilder
-                ->add('skip', SubmitType::class, ['label'=>'<span class="fa fa-trash"></span>&nbsp;&nbsp;Do not send email, mark as Skipped', 'label_html' => true, 'attr' => ['class' => 'btn btn-default']])
+                ->add('skip', SubmitType::class, [
+                    'priority' => 101,
+                    'label'=>'<span class="fa fa-archive"></span>&nbsp;&nbsp;Do not send email, save and mark as Skipped',
+                    'label_html' => true,
+                    'attr' => ['class' => 'btn btn-default ms-3'],
+                    'row_attr' => ['class' => 'float-end']
+                ])
             ;
         }
         return $formBuilder->getForm();
@@ -179,14 +223,27 @@ trait KikwikMailLogCrudControllerTrait
 
     protected function updateLog(Log $log, FormInterface $form): void
     {
-        $email = $log->getUnserializedEmail();;
+        $email = new TemplatedEmail();
         // Update the TemplatedEmail object with the form data
         $data = $form->getData();
         $email
-            ->to($data['recipientAddress'])
             ->subject($data['subject'])
             ->html($data['body'])
         ;
+        if($data['to'])
+        {
+            $email->to($data['to']);
+        }
+        if($data['cc'])
+        {
+            $ccs = explode(', ',$data['cc']);
+            $email->cc(...$ccs);
+        }
+        if($data['bcc'])
+        {
+            $bccs = explode(', ',$data['bcc']);
+            $email->bcc(...$bccs);
+        }
         // Upload email to log
         $log->fromEmail($email);
     }
