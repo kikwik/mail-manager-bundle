@@ -56,7 +56,7 @@ trait KikwikMailLogCrudControllerTrait
                 'data-bs-toggle' => 'tooltip',
             ])
             ->displayIf(static function ($log) {
-                return !$log->getSendedAt();
+                return !$log?->getSendedAt();
             });
     }
 
@@ -69,7 +69,7 @@ trait KikwikMailLogCrudControllerTrait
                 'data-bs-toggle' => 'tooltip',
             ])
             ->displayIf(static function ($log) {
-                return $log->getSendedAt();
+                return $log?->getSendedAt();
             });
     }
 
