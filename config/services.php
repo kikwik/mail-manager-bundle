@@ -22,6 +22,7 @@ return static function (ContainerConfigurator $container): void {
             ->args([
                 service('mailer'),
                 service('doctrine'),
+                service('form.factory'),
             ])
             ->alias(MailSender::class, 'kikwik_mail_manager.service.mail_sender')
     ;

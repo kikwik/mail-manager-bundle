@@ -88,25 +88,22 @@ trait KikwikMailLogCrudControllerTrait
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->generateUrl());
         }
 
-        $form = $this->createSendForwardForm($log->getUnserializedEmail(), 'send');
+        $form = $mailSender->createSendFormBuilder($log, true)->getForm();
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid())
         {
-            $this->updateLog($log, $form);
-
-            if($form->get('skip')->isClicked())
+            $action = $mailSender->processSendForm($log, $form);
+            switch($action)
             {
-                // skip email
-                $mailSender->doNotSend($log);
-                $this->addFlash('success', 'This email has just been skipped');
+                case 'skip':
+                    $this->addFlash('success', 'This email has just been skipped');
+                    break;
+                case 'send':
+                    $this->addFlash('success', 'This email has just been sended');
+                    break;
+                default:
+                    $this->addFlash('success', 'This email has just been '.$action);
             }
-            else
-            {
-                // send email
-                $mailSender->send($log);
-                $this->addFlash('success', 'This email has just been sended');
-            }
-
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->setEntityId($log->getId())->generateUrl());
         }
 
@@ -128,15 +125,22 @@ trait KikwikMailLogCrudControllerTrait
         $this->cloneLogCustomFields($oldLog, $newLog);
         $newLog->setSendedAt(null);
 
-        $form = $this->createSendForwardForm($newLog->getUnserializedEmail(), 'forward');
+        $form = $mailSender->createSendFormBuilder($newLog, false)->getForm();
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid())
         {
-            $this->updateLog($newLog, $form);
-
-            // send email
-            $mailSender->send($newLog);
-            $this->addFlash('success', 'This email has just been sended');
+            $action = $mailSender->processSendForm($newLog, $form);
+            switch($action)
+            {
+                case 'skip':
+                    $this->addFlash('success', 'This email has just been skipped');
+                    break;
+                case 'send':
+                    $this->addFlash('success', 'This email has just been sended');
+                    break;
+                default:
+                    $this->addFlash('success', 'This email has just been '.$action);
+            }
 
             return $this->redirect($adminUrlGenerator->setAction(Action::DETAIL)->setEntityId($newLog->getId())->generateUrl());
         }
@@ -146,106 +150,6 @@ trait KikwikMailLogCrudControllerTrait
             'form' => $form->createView(),
             'action' => 'forward'
         ]);
-    }
-
-    protected function createSendForwardForm(Email $email, string $action): FormInterface  // TODO: move to a form type
-    {
-        $toData = [];
-        foreach($email->getTo() as $to)
-        {
-            $toData[] = $to->getAddress();
-        }
-        $ccData = [];
-        foreach($email->getCc() as $cc)
-        {
-            $ccData[] = $cc->getAddress();
-        }
-        $bccData = [];
-        foreach($email->getBcc() as $bcc)
-        {
-            $bccData[] = $bcc->getAddress();
-        }
-        // Create a form to edit the TemplatedEmail subject fields
-        $formBuilder = $this->createFormBuilder(null,[ 'attr' => ['novalidate' => 'novalidate']])
-            ->add('to', EmailType::class, [
-                'data' => implode(', ', $toData),
-                'label' => 'To',
-                'constraints' => new EmailList(),
-            ])
-            ->add('cc', TextType::class, [
-                'data' => implode(', ', $ccData),
-                'label' => 'Cc',
-                'help' => 'Separate multiple emails with a comma (,)',
-                'constraints' => new EmailList(),
-            ])
-            ->add('bcc', TextType::class, [
-                'data' => implode(', ', $bccData),
-                'label' => 'Bcc',
-                'help' => 'Separate multiple emails with a comma (,)',
-                'constraints' => new EmailList(),
-            ])
-            ->add('subject', TextType::class, [
-                'data' => $email->getSubject(),
-                'label' => 'Subject',
-            ])
-            ->add('body', QuillType::class, [
-                'data' => $email->getHtmlBody(),
-                'label' => 'Content',
-                'quill_extra_options' => [
-                    'height' => '780px',
-                ],
-                'quill_options' => [
-                    QuillGroup::buildWithAllFields()
-                ],
-            ])
-            ->add('send', SubmitType::class, [
-                'priority' => 100,
-                'label'=>'<span class="fa fa-paper-plane"></span>&nbsp;&nbsp;Send email',
-                'label_html' => true,
-                'attr' => ['class' => 'btn btn-primary'],
-                'row_attr' => ['class' => 'text-end']
-            ])
-        ;
-        if($action === 'send')
-        {
-            $formBuilder
-                ->add('skip', SubmitType::class, [
-                    'priority' => 101,
-                    'label'=>'<span class="fa fa-archive"></span>&nbsp;&nbsp;Do not send email, save and mark as Skipped',
-                    'label_html' => true,
-                    'attr' => ['class' => 'btn btn-default ms-3'],
-                    'row_attr' => ['class' => 'float-end']
-                ])
-            ;
-        }
-        return $formBuilder->getForm();
-    }
-
-    protected function updateLog(Log $log, FormInterface $form): void
-    {
-        $email = new TemplatedEmail();
-        // Update the TemplatedEmail object with the form data
-        $data = $form->getData();
-        $email
-            ->subject($data['subject'])
-            ->html($data['body'])
-        ;
-        if($data['to'])
-        {
-            $email->to($data['to']);
-        }
-        if($data['cc'])
-        {
-            $ccs = explode(', ',$data['cc']);
-            $email->cc(...$ccs);
-        }
-        if($data['bcc'])
-        {
-            $bccs = explode(', ',$data['bcc']);
-            $email->bcc(...$bccs);
-        }
-        // Upload email to log
-        $log->fromEmail($email);
     }
 
     /**

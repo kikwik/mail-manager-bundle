@@ -69,13 +69,13 @@ final class KikwikMailManagerBundle extends AbstractBundle
         ));
     }
 
-    public function prependExtension(ContainerConfigurator $configurator, ContainerBuilder $container): void
+    public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-        if (!$this->isAssetMapperAvailable($container)) {
+        if (!$this->isAssetMapperAvailable($builder)) {
             return;
         }
 
-        $container->prependExtensionConfig('framework', [
+        $builder->prependExtensionConfig('framework', [
             'asset_mapper' => [
                 'paths' => [
                     __DIR__ . '/../assets' => '@kikwik/mail-manager-bundle',
