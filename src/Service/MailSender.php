@@ -42,17 +42,17 @@ class MailSender
         $toData = [];
         foreach($email->getTo() as $to)
         {
-            $toData[] = $to->getAddress();
+            $toData[] = $to->toString();
         }
         $ccData = [];
         foreach($email->getCc() as $cc)
         {
-            $ccData[] = $cc->getAddress();
+            $ccData[] = $cc->toString();
         }
         $bccData = [];
         foreach($email->getBcc() as $bcc)
         {
-            $bccData[] = $bcc->getAddress();
+            $bccData[] = $bcc->toString();
         }
         // Create a form to edit the TemplatedEmail subject fields
         $formBuilder = $this->formFactory->createBuilder(FormType::class,null,[ 'attr' => ['novalidate' => 'novalidate']])
@@ -134,12 +134,12 @@ class MailSender
         }
         if($data['cc'])
         {
-            $ccs = explode(', ',$data['cc']);
+            $ccs = explode(',',$data['cc']);
             $email->cc(...$ccs);
         }
         if($data['bcc'])
         {
-            $bccs = explode(', ',$data['bcc']);
+            $bccs = explode(',',$data['bcc']);
             $email->bcc(...$bccs);
         }
         // Upload email to log

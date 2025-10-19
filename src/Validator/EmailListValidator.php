@@ -14,6 +14,12 @@ class EmailListValidator extends ConstraintValidator
         foreach ($emails as $email) {
             if($email)
             {
+                // check if email is in the format "name <email>"
+                if (preg_match('/^.+<(.+)>$/', $email, $matches)) {
+                    $email = $matches[1];
+                }
+
+                // check if email is valid
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $invalidEmails[] = $email;
                 }
