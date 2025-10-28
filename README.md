@@ -197,15 +197,18 @@ Autowire the `Kikwik\MailManagerBundle\Service\MailManager` service to send emai
 
 ```php
 
-use \Kikwik\MailManagerBundle\Service\MailBuilderFactory;
-use \Kikwik\MailManagerBundle\Service\MailSender;
+use App\Entity\Mail\MailTemplate;
+use Symfony\Component\Mime\Address;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Kikwik\MailManagerBundle\Service\MailBuilderFactory;
+use Kikwik\MailManagerBundle\Service\MailSender;
 
 final class MyController extends AbstractController
 {
     public function myAction(MailBuilderFactory $mailBuilderFactory, MailSender $mailSender)
     {
         // Example 1 - create, send and persist       
-        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))   // MailBuilderFactory will be null if the template does not exists or is not enabled
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder(MailTemplate::MODEL1))   // MailBuilderFactory will be null if the template does not exists or is not enabled
         {
             // create the Log object
             $mailLog = $mailBuilder
@@ -223,7 +226,7 @@ final class MyController extends AbstractController
         }
         
         // Example 2 - persist the log without send email for later review
-        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder(MailTemplate::MODEL1))
         {
             // create the Log object
             $mailLog = $mailBuilder
@@ -237,7 +240,7 @@ final class MyController extends AbstractController
         }
 
         // Example 3 - persist the log without send email for archive
-        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder(MailTemplate::MODEL1))
         {
             // create the Log object
             $mailLog = $mailBuilder
@@ -251,7 +254,7 @@ final class MyController extends AbstractController
         }
         
         // Example 4 - send email without persist the log
-        if($mailBuilder = $mailBuilderFactory->createMailBuilder('my_template_name'))
+        if($mailBuilder = $mailBuilderFactory->createMailBuilder(MailTemplate::MODEL1))
         {
             // create the Log object
             $mailLog = $mailBuilder
