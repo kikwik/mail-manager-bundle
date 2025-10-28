@@ -21,7 +21,7 @@ $ composer require kikwik/mail-manager-bundle
 Configuration
 -------------
 
-1. Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Template`.
+1. Create your Entity class that extends `Kikwik\MailManagerBundle\Model\Template`.
     The static `getTemplateChoices` method can be used to list the available templates defined in the system (inside the easyadmin controllers)
 
 ```php
@@ -81,7 +81,7 @@ class MailTemplate extends Template
 }
 ```
 
-2. (optional) Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Decorator`:
+2. (optional) Create your Entity class that extends `Kikwik\MailManagerBundle\Model\Decorator`:
 
 
 ```php
@@ -127,7 +127,7 @@ class MailDecorator extends Decorator
 
 ```
 
-3. Create your Entity class the extends from `Kikwik\MailManagerBundle\Model\Log`:
+3. Create your Entity class that extends `Kikwik\MailManagerBundle\Model\Log`:
 
 
 ```php
@@ -215,7 +215,7 @@ final class MyController extends AbstractController
                 ->bcc(['admin@mycompany.com', 'helpdesk@mycompany.com'])    // set bcc
                 ->getLog()
             ;
-            $mailLog->setSomethingCustom($myObject); // set a custom property defined in your App\Entity\Mail\MailLog entity
+            $mailLog->setSomethingCustom($myObject); // $mailLog is your App\Entity\Mail\MailLog entity, you can set your custom property
                 
             $mailSender
                 ->send($mailLog)         // send the email, persist the $mailLog and flush
@@ -232,7 +232,7 @@ final class MyController extends AbstractController
                 ->getLog()
             ;
             $mailSender
-                ->needManualReview($mailLog)    // save the Log object in the database and mark it as "need manual review"
+                ->needManualReview($mailLog)    // mark the Log object as "need manual review", persist and flush
             ;
         }
 
@@ -246,7 +246,7 @@ final class MyController extends AbstractController
                 ->getLog()
             ;
             $mailSender
-                ->doNotSend($mailLog)    // save the Log object in the database and mark it as "do not send"
+                ->doNotSend($mailLog)    // mark the Log object as "do not send", persist and flush
             ;
         }
         
@@ -259,7 +259,7 @@ final class MyController extends AbstractController
                 ->to([new Address('sales@customer.com','My customer')])
                 ->getLog()
             ;
-            $mailSender->send($mailLog, false); // send the email without saving the Log object in the database
+            $mailSender->send($mailLog, false); // send the email without saving the Log object in the database thanks to the second false parameter
         }
     }
 }
